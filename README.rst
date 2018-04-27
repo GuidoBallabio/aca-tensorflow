@@ -23,7 +23,8 @@ In the case there is too much noise in your system, please measure multiple time
 To reduce the effects of caches, you should run N times your application successively and discard the first 5-10 measurements (This is sometimes called cache-warming).
 
 A good tutorial for Neural Network, if you have no idea what they are. They are not strictly necessary for the projects, but it may give better perspective and context to you on ”why you are doing X project?”.
-- http://cs231n.stanford.edu/
+
+* http://cs231n.stanford.edu/
 
 
 ----------------------------------------------
@@ -39,6 +40,7 @@ For real world application, convolutional neural network(CNN) model can take mor
 The comparison of the models will be based on the execution time, model size and cache utilization of the inference run of the neural networks that are trained. The effectiveness of comparison between different networks are essential for this project therefore it is strongly suggested for students to train networks with diverse characteristics. The inference run might be tested on CPU platforms and the cache utilization can be gathered from Linux Perf or Cachegrind tools.
 
 References (Starting Points):
-- https://www.tensorflow.org/performance/quantization
-- http://valgrind.org/docs/manual/cg-manual.html
-- https://perf.wiki.kernel.org/index.php/Main_Page
+
+* https://www.tensorflow.org/performance/quantization
+* http://valgrind.org/docs/manual/cg-manual.html
+* https://perf.wiki.kernel.org/index.php/Main_Page
