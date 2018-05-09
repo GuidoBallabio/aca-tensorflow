@@ -1,2 +1,8 @@
 tensorflow
-pytest
+perf
+scipy
+sklearn
+h5py
+autopep8
+yapf
+isort

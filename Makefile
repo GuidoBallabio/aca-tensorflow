@@ -1,7 +1,5 @@
 init:
 	pip install -r requirements.txt
+	python -m cnn.utils
 
-test:
-	pytest
-
-.PHONY: init test
+.PHONY: init
