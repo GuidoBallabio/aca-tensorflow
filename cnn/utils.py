@@ -1,4 +1,4 @@
-"""This module provides utilities to download, init and load cifar10 dataset."""
+"""This provides utilities to download, init and load cifar10 dataset."""
 
 import pickle
 import tarfile
@@ -8,6 +8,7 @@ from urllib.request import urlretrieve
 import h5py
 import numpy as np
 from sklearn.utils import shuffle
+from tensorflow import keras
 
 DATA_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
 DATA_DIR = Path(__file__).parent / 'data'
@@ -79,13 +80,27 @@ def convert_dataset_to_h5():
         print('Conversion to HDF5 file successful')
 
 
-def load_dataset():
+def load_dataset_as_tensors():
     """Load dataset from h5 (not lazily)."""
 
     h5_filename = DATA_DIR / DATASET_FILE
     with h5py.File(h5_filename.absolute(), 'r') as ds:
         return (ds['data/train'][()], ds['label/train'][()],
                 ds['data/test'][()], ds['label/test'][()])
+
+
+def preprocess_dataset(x_train, t_train, x_test, t_test, NCHW=False):
+    """Preprocess dataset: label -> one hot encodeing, transpose if not in NCHW order."""
+
+    t_train = keras.utils.to_categorical(t_train).astype(np.uint8)
+    t_test = keras.utils.to_categorical(t_test).astype(np.uint8)
+
+    if not NCHW:
+        return (x_train.transpose(0, 2, 3, 1), t_train,
+                x_test.transpose(0, 2, 3, 1), t_test)
+    else:
+        return (x_train, t_train,
+                x_test, t_test)
 
 
 if __name__ == '__main__':
