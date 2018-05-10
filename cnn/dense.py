@@ -4,9 +4,6 @@ from tensorflow import keras
 
 from cnn.utils import load_dataset_as_tensors, preprocess_dataset
 
-
-N_TRAIN_SAMPLES = x_train.shape[0]
-N_TEST_SAMPLES = x_test.shape[0]
 BATCH_SIZE = 64
 
 model = keras.Sequential(
@@ -39,9 +36,9 @@ if __name == '__main__':
         x=x_train,
         y=t_train,
         batch_size=BATCH_SIZE,
-        epochs=3,
+        epochs=1,
         validation_split=0.2,
         shuffle=False,
-        initial_epoch=2)
+        initial_epoch=0)
 
     print(hist.history)
