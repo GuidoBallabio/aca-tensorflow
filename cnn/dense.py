@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-from utils import load_dataset_as_tensors, preprocess_dataset
+from cnn.utils import load_dataset_as_tensors, preprocess_dataset
 
 BATCH_SIZE = 64
 
