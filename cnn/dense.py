@@ -30,7 +30,7 @@ model.compile(
     metrics=['accuracy', keras.metrics.mean_squared_error])
 
 if __name__ == '__main__':
-    x_train, t_train, x_test, t_test = preprocess_dataset(load_dataset_as_tensors())
+    x_train, t_train, x_test, t_test = preprocess_dataset(*load_dataset_as_tensors())
 
     hist = model.fit(
         x=x_train,
