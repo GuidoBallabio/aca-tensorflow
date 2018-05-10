@@ -4,7 +4,7 @@ from tensorflow import keras
 
 from cnn.utils import load_dataset_as_tensors, preprocess_dataset
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 
 model = keras.Sequential(
     name='dense_cnn',
@@ -38,7 +38,6 @@ if __name__ == '__main__':
         batch_size=BATCH_SIZE,
         epochs=1,
         validation_split=0.2,
-        shuffle=False,
         initial_epoch=0)
 
     print(hist.history)
