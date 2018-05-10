@@ -1,3 +1,5 @@
+all: init dense benchmarks
+
 init:
 	pip install -r requirements.txt
 	python -m cnn.utils
@@ -7,10 +9,15 @@ dense:
 
 conv:
 
+
 complex:
+
+
+benchmark:
+	jupyter notebook Benchmarks.ipynb
 
 clean:
 	rm -r cnn/data
-	rm -r cnn/models
+	rm cnn/models/*
 
-.PHONY: init dense clean
+.PHONY: init dense benchmarks clean

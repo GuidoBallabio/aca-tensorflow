@@ -13,7 +13,7 @@ from tensorflow import keras
 DATA_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
 DATA_DIR = Path(__file__).parent / 'data'
 DATASET_FILE = 'cifar10.h5'
-
+MODELS_DIR = Path(__file__).parent / 'models'
 
 def download_and_extract():
     """Download and extract cifar10 dataset."""
@@ -122,6 +122,14 @@ def dataset_preprocessed_by_keras(x_train):
     # compute quantities required for featurewise normalization
     # (std, mean, and principal components if ZCA whitening is applied)
     return datagen.fit(x_train)
+
+def save_model(model):
+    return model.save(MODELS_DIR / (model.name + '.h5'))
+
+
+def load_model(name):
+    return keras.models.load_model(MODELS_DIR / (name + '.h5'))
+
 
 if __name__ == '__main__':
     download_and_extract()
