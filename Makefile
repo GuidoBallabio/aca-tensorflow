@@ -2,10 +2,15 @@ init:
 	pip install -r requirements.txt
 	python -m cnn.utils
 
-fit:
+dense:
 	python -m cnn.dense
+
+conv:
+
+complex:
 
 clean:
 	rm -r cnn/data
+	rm -r cnn/models
 
-.PHONY: init fit clean
+.PHONY: init dense clean
