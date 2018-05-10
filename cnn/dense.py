@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-from cnn.utils import load_dataset_as_tensors, preprocess_dataset
+from utils import load_dataset_as_tensors, preprocess_dataset
 
 BATCH_SIZE = 64
 
@@ -29,7 +29,7 @@ model.compile(
     optimizer='sgd',
     metrics=['accuracy', keras.metrics.mean_squared_error])
 
-if __name == '__main__':
+if __name__ == '__main__':
     x_train, t_train, x_test, t_test = preprocess_dataset(load_dataset_as_tensors())
 
     hist = model.fit(
