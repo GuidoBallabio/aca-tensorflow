@@ -7,13 +7,16 @@ from urllib.request import urlretrieve
 
 import h5py
 import numpy as np
-from sklearn.utils import shuffle
+import tensorflow as tf
 from tensorflow import keras
+
+from sklearn.utils import shuffle
 
 DATA_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
 DATA_DIR = Path(__file__).parent / 'data'
 DATASET_FILE = 'cifar10.h5'
 MODELS_DIR = Path(__file__).parent / 'models'
+
 
 def download_and_extract():
     """Download and extract cifar10 dataset."""
@@ -102,16 +105,17 @@ def preprocess_dataset(x_train, t_train, x_test, t_test, NCHW=False):
         return (x_train, t_train,
                 x_test, t_test)
 
+
 def dataset_preprocessed_by_keras(x_train):
     """Load and Preprocess online the dataset, by Keras.s
-    
+
     To use with:
         # fits the model on batches with real-time data augmentation:
         model.fit_generator(datagen.flow(x_train, y_train, batch_size=32),
                             steps_per_epoch=len(x_train) / 32, epochs=epochs)
     """
 
-    datagen = ImageDataGenerator(
+    datagen = keras.preprocessing.image.ImageDataGenerator(
         featurewise_center=True,
         featurewise_std_normalization=True,
         rotation_range=20,
@@ -121,28 +125,54 @@ def dataset_preprocessed_by_keras(x_train):
 
     # compute quantities required for featurewise normalization
     # (std, mean, and principal components if ZCA whitening is applied)
+
     return datagen.fit(x_train)
 
-def save_model(model):
+
+def model_to_estimator(model):
+    """
+    Create an Estimator from the compiled Keras model.
+
+    Note the initial model state of the keras model is preserved in the created Estimator.
+    """
+
+    return keras.estimator.model_to_estimator(
+            keras_model=model,
+            model_dir=(MODELS_DIR / model.name).absolute()
+            )
+
+
+def convert_input_to_est_format(x, t, names, epochs):
+    """
+    Convert input to estimator format given model.input_names and epochs.
+
+    To train, we call Estimator's train function:
+    est_inception_v3.train(input_fn=train_input_fn, steps=2000)
+    """
+
+    return tf.estimator.inputs.numpy_input_fn(
+        x={names[0]: x},
+        y=t,
+        num_epochs=epochs,
+        shuffle=False)
+
+
+def save_keras_model(model):
+    """Save keras model in default dir."""
+
     return model.save(MODELS_DIR / (model.name + '.h5'))
 
 
-def load_model(name):
+def load_keras_model(name):
+    """Save keras model in default dir."""
+
     filepath = MODELS_DIR / (name + '.h5')
-    
-    if filepath.exists()
+
+    if filepath.exists():
         return keras.models.load_model(filepath)
-    else:
-        return None
 
+    return None
 
-def quantize_keras_model(model):
-    pass
-    
-
-def quantize_estimator_model(model):
-    pass
-    
 
 if __name__ == '__main__':
     download_and_extract()
