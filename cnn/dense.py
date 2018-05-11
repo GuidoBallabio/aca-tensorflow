@@ -2,16 +2,16 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-from cnn.utils import load_dataset_as_tensors, preprocess_dataset, save_model
+from cnn.utils import load_dataset_as_tensors, preprocess_dataset, save_model, load_model
 
 BATCH_SIZE = 64
-
+NET_NAME = 'dense_cnn'
 
 def model_fn():
     """Define and return dense cnn model, by keras."""
 
     model = keras.Sequential(
-        name='dense_cnn',
+        name=NET_NAME,
         layers=[
             keras.layers.Conv2D(
                 32,
@@ -40,13 +40,15 @@ if __name__ == '__main__':
     x_train, t_train, x_test, t_test = preprocess_dataset(
         *load_dataset_as_tensors())
 
-    model = model_fn()
+    model = load_model(NET_NAME)
+    if model is None:
+        model = model_fn()
 
     hist = model.fit(
         x=x_train,
         y=t_train,
         batch_size=BATCH_SIZE,
-        epochs=1,
+        epochs=50,
         validation_split=0.2,
         initial_epoch=0)
 

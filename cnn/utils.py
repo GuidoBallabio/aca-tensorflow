@@ -128,8 +128,21 @@ def save_model(model):
 
 
 def load_model(name):
-    return keras.models.load_model(MODELS_DIR / (name + '.h5'))
+    filepath = MODELS_DIR / (name + '.h5')
+    
+    if filepath.exists()
+        return keras.models.load_model(filepath)
+    else:
+        return None
 
+
+def quantize_keras_model(model):
+    pass
+    
+
+def quantize_estimator_model(model):
+    pass
+    
 
 if __name__ == '__main__':
     download_and_extract()
