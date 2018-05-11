@@ -1,7 +1,7 @@
 all: init dense benchmarks
 
 init:
-	pip install -r requirements.txt
+	pip install -U -r requirements.txt
 	python -m cnn.utils
 
 dense:
