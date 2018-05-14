@@ -1,5 +1,5 @@
 cnn/data/
-
+cnn/models/dense_cnn/*
 
 # Byte-compiled / optimized / DLL files
 .pytest*
