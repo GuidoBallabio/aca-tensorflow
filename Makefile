@@ -1,8 +1,8 @@
-all: init dense benchmarks
+all: init benchmarks
 
 init:
 	pip install -U -r requirements.txt
-	python -m cnn.utils
+	python -m cnn.utils.dataset
 
 dense:
 	python -m cnn.dense
