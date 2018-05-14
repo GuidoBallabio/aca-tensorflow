@@ -1,64 +1,79 @@
+"""This module defines a Simple CNN"""
+
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
 
-from utils import load_dataset_as_tensors, preprocess_dataset, save_keras_model, load_keras_model
+from cnn.utils.dataset import load_cifar10, dataset_preprocessing_by_keras
+from cnn.model_class import TfClassifier
 
 BATCH_SIZE = 64
 NET_NAME = 'dense_cnn'
+EPOCHS = 50
 
-def model_fn():
-    """Define and return dense cnn model, by keras."""
 
-    model = keras.Sequential(
-        name=NET_NAME,
-        layers=[
-            keras.layers.Conv2D(
-                32,
-                5,
-                input_shape=(32, 32, 3),
-                padding='same',
-                activation=tf.nn.relu),
-            keras.layers.MaxPooling2D((2, 2), (2, 2), padding='same'),
-            keras.layers.Conv2D(64, 5, padding='same', activation=tf.nn.relu),
-            keras.layers.MaxPooling2D((2, 2), (2, 2), padding='same'),
-            keras.layers.Flatten(),
-            keras.layers.Dense(1024, activation=tf.nn.relu),
-            keras.layers.Dropout(0.4),
-            keras.layers.Dense(10, activation=tf.nn.softmax)
-        ])
+def forward_pass(train_mode_placeholder=None):
+    features = tf.placeholder(
+        tf.float32, shape=(None, 32, 32, 3), name="features")
 
-    model.compile(
-        loss='categorical_crossentropy',
-        optimizer='sgd',
-        metrics=['accuracy', keras.metrics.mean_squared_error])
+    conv1 = tf.layers.conv2d(
+        inputs=features,
+        filters=32,
+        kernel_size=5,
+        padding="same",
+        activation=tf.nn.relu)
 
-    return model
+    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=(2, 2), strides=2)
+
+    conv2 = tf.layers.conv2d(
+        inputs=pool1,
+        filters=64,
+        kernel_size=5,
+        padding="same",
+        activation=tf.nn.relu)
+
+    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=(2, 2), strides=2)
+    
+    pool2_flat = tf.layers.flatten(pool2)
+
+    dense = tf.layers.dense(
+        inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+
+    dropout = tf.layers.dropout(
+        inputs=dense, rate=0.4, training=train_mode_placeholder)
+
+    return tf.layers.dense(inputs=dropout, units=10, name="logits")
+
+
+def loss_fn(logits):
+    labels = tf.placeholder(tf.float32, [None, 10], name="labels")
+    return tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+
+
+def eval_fn(predictions):
+    labels = tf.get_default_graph().get_tensor_by_name("labels:0")
+    eval_metrics = {
+        "accuracy":
+        tf.metrics.accuracy(labels=tf.argmax(labels, axis=1), 
+            predictions=predictions["classes"]),
+        "mse":
+        tf.metrics.mean_squared_error(
+            labels=labels, predictions=predictions["logits"])
+    }
+    return eval_metrics
 
 
 if __name__ == '__main__':
-    x_train, t_train, x_test, t_test = preprocess_dataset(
-        *load_dataset_as_tensors())
+    x_train, t_train, x_test, t_test = load_cifar10()
 
-    '''Normalization of data'''
-    x_train = x_train.astype('float32')
-    x_test = x_test.astype('float32')
-    x_train /= 255
-    x_test /= 255
+    x_train = dataset_preprocessing_by_keras(x_train)
+    
+    model = TfClassifier(NET_NAME, forward_pass, loss_fn, eval_fn,
+                         tf.train.AdamOptimizer())
+    history = model.fit(
+        [x_train, t_train], batch_size=BATCH_SIZE, epochs=EPOCHS)
 
-    '''Model load, train and save'''
-    model = load_keras_model(NET_NAME)
-    if model is None:
-        model = model_fn()
+    print(history)
 
-    hist = model.fit(
-        x=x_train,
-        y=t_train,
-        batch_size=BATCH_SIZE,
-        epochs=50,
-        validation_split=0.2,
-        initial_epoch=0)
+    evals = model.evaluate([x_test, t_test])
 
-    save_keras_model(model)
-
-    print(hist.history)
+    print(evals)
