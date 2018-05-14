@@ -70,7 +70,7 @@ if __name__ == '__main__':
     model = TfClassifier(NET_NAME, forward_pass, loss_fn, eval_fn,
                          tf.train.AdamOptimizer())
     history = model.fit(
-        [x_train, t_train], batch_size=BATCH_SIZE, epochs=EPOCHS)
+        [x_train, t_train], batch_size=BATCH_SIZE, epochs=1, verbosity=2)
 
     print(history)
 

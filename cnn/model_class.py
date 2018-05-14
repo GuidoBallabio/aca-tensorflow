@@ -51,8 +51,8 @@ class TfClassifier:
         self.train_ops_graph = self.train_graph()
         self.eval_ops_graph = self.evaluate_graph()
         self.predict_ops_graph = self.predict_graph()
-        self.tb_path = (Path("/tmp/log-tb/") / self.name).absolute()
-        self.save_path = (MODELS_DIR / (self.name + ".ckpt")).absolute()
+        self.tb_path = (Path("/tmp/log-tb/") / self.name).as_posix()
+        self.save_path = (MODELS_DIR / (self.name + ".ckpt")).as_posix()
 
     def _infer(self):
 
@@ -204,16 +204,17 @@ class TfClassifier:
                 i = 1
 
             for e in range(1, epochs + 1):
+                sess.run(tf.local_variables_initializer())
 
                 for train_dict in train_LD:
-                    sess.run(tf.local_variables_initializer())
                     out = sess.run(ops, feed_dict=train_dict)
                     if verbosity >= 1:
                         summary_writer.add_summary(out["summaries"], i)
                         summary_writer.flush()
                         i = i + 1
                     if verbosity == 2:
-                        print(out)
+                        print({x: out[x]
+                             for x in out if x in ["accuracy", "mse", "loss"]})
 
                 sess.run(tf.local_variables_initializer())
                 out = sess.run(
