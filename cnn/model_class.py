@@ -52,7 +52,7 @@ class TfClassifier:
         self.eval_ops_graph = self.evaluate_graph()
         self.predict_ops_graph = self.predict_graph()
         self.tb_path = (Path("/tmp/log-tb/") / self.name).as_posix()
-        self.save_path = (MODELS_DIR / (self.name + ".ckpt")).as_posix()
+        self.save_path = (MODELS_DIR / self.name / ("model.ckpt")).as_posix()
 
     def _infer(self):
 
@@ -248,7 +248,6 @@ class TfClassifier:
         """
 
         ops, graph = self.predict_ops_graph
-        saver = tf.train.Saver()
 
         input_tensors = map(tf.get_default_graph().get_tensor_by_name,
                             input_names)
@@ -256,6 +255,7 @@ class TfClassifier:
         input_dict.update({self._training_placeholder: False})
 
         with tf.Session(graph=graph) as sess:
+            saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
             saver.restore(sess, self.save_path)
 
@@ -263,7 +263,7 @@ class TfClassifier:
 
         return out
 
-    def evaluate(self, inputs, input_name=["features", "labels"]):
+    def evaluate(self, inputs, input_names=["features", "labels"]):
         """Evaluate trained model on the given data.
         
         Args:
@@ -281,7 +281,6 @@ class TfClassifier:
         """
 
         ops, graph = self.eval_ops_graph
-        saver = tf.train.Saver()
 
         input_tensors = map(tf.get_default_graph().get_tensor_by_name,
                             input_names)
@@ -289,6 +288,7 @@ class TfClassifier:
         input_dict.update({self._training_placeholder: False})
 
         with tf.Session(graph=graph) as sess:
+            saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
             saver.restore(sess, self.save_path)
 
