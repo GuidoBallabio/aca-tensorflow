@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-from cnn.utils import load_dataset_as_tensors, preprocess_dataset, save_model, load_model
+from utils import load_dataset_as_tensors, preprocess_dataset, save_keras_model, load_keras_model
 
 BATCH_SIZE = 64
 NET_NAME = 'dense_cnn'
@@ -40,7 +40,14 @@ if __name__ == '__main__':
     x_train, t_train, x_test, t_test = preprocess_dataset(
         *load_dataset_as_tensors())
 
-    model = load_model(NET_NAME)
+    '''Normalization of data'''
+    x_train = x_train.astype('float32')
+    x_test = x_test.astype('float32')
+    x_train /= 255
+    x_test /= 255
+
+    '''Model load, train and save'''
+    model = load_keras_model(NET_NAME)
     if model is None:
         model = model_fn()
 
@@ -52,6 +59,6 @@ if __name__ == '__main__':
         validation_split=0.2,
         initial_epoch=0)
 
-    save_model(model)
+    save_keras_model(model)
 
     print(hist.history)
