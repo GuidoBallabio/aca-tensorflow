@@ -200,8 +200,8 @@ class TfClassifier:
         else:
             val_LD = [val_dict]
 
-        train_LD = sel._set_train_mode_to_LD(train_LD, True)
-        val_LD = sel._set_train_mode_to_LD(val_LD, False)
+        train_LD = self._set_train_mode_to_LD(train_LD, True)
+        val_LD = self._set_train_mode_to_LD(val_LD, False)
 
         return train_LD, val_LD
 
@@ -241,7 +241,7 @@ class TfClassifier:
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
 
-            train_LD, val_dict = self._split_and_batch(
+            train_LD, val_LD = self._split_and_batch(
                 inputs, input_names, batch_size, validation_split)
 
             if verbosity >= 1:
@@ -294,21 +294,23 @@ class TfClassifier:
                                 if x in ["accuracy", "mse", "loss"]
                             })
 
-                if verbosity >= 1:
-                    run_metadata = tf.RunMetadata()
+                sess.run(tf.local_variables_initializer())                
+                for val_dict in val_LD:
 
-                sess.run(tf.local_variables_initializer())
-                out = sess.run(
-                    {x: ops[x]
-                     for x in ops if x not in ["train_op"]},
-                    feed_dict=val_dict,
-                    options=run_options,
-                    run_metadata=run_metadata)
+                    if verbosity >= 1:
+                        run_metadata = tf.RunMetadata()
 
-                if verbosity >= 1:
-                    summary_writer_validation.add_summary(out["summaries"], e)
-                    summary_writer_train.flush()
-                    summary_writer_validation.flush()
+                    out = sess.run(
+                        {x: ops[x]
+                         for x in ops if x not in ["train_op"]},
+                        feed_dict=val_dict,
+                        options=run_options,
+                        run_metadata=run_metadata)
+
+                    if verbosity >= 1:
+                        summary_writer_validation.add_summary(out["summaries"], e)
+                        summary_writer_train.flush()
+                        summary_writer_validation.flush()
 
                 history.append(out)
 
