@@ -348,7 +348,9 @@ class TfClassifier:
             sess.run(tf.global_variables_initializer())
             saver.restore(sess, self.save_path)
 
-            out = sess.run(ops, feed_dict=input_dict)
+            out = []
+            for input_dict in input_LD:
+                out.append(sess.run(ops, feed_dict=input_dict))
 
         return out
 
@@ -379,7 +381,9 @@ class TfClassifier:
             sess.run(tf.global_variables_initializer())
             saver.restore(sess, self.save_path)
 
-            out = sess.run(ops, feed_dict=input_dict)
+            out = []
+            for input_dict in input_LD:
+                out.append(sess.run(ops, feed_dict=input_dict))
 
         return out
 
