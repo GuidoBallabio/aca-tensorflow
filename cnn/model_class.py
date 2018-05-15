@@ -167,7 +167,7 @@ class TfClassifier:
         input_dict = self._init_dict(inputs, input_names)
         n_samples = inputs[0].shape[0]
 
-        if n_samples - n_train_samples > MAX_BATCH_SIZE:
+        if n_samples > MAX_BATCH_SIZE:
             out_LD = self._batch_data_dict(input_dict, n_samples,
                                            MAX_BATCH_SIZE)
         else:
