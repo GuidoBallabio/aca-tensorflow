@@ -164,7 +164,7 @@ class TfClassifier:
         return input_LD
 
     def _init_dict_split_max(self, inputs, input_names):
-        input_dict = self._init_dict(inputs, input_names)
+        input_dict = self._init_dict(inputs, input_names)[1]
         n_samples = inputs[0].shape[0]
 
         if n_samples > MAX_BATCH_SIZE:
