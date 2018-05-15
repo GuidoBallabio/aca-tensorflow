@@ -1,5 +1,6 @@
 cnn/data/
 cnn/models/dense_cnn/*
+.Makef*
 
 # Byte-compiled / optimized / DLL files
 .pytest*
