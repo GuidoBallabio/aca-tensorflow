@@ -51,13 +51,16 @@ class TfClassifier:
         self.train_ops_graph = self.train_graph()
         self.eval_ops_graph = self.evaluate_graph()
         self.predict_ops_graph = self.predict_graph()
-        self.tb_path = (Path("/tmp/log-tb/") / self.name).as_posix()
+        self.tb_path_train = (
+            Path("/tmp/log-tb/") / self.name / "training").as_posix()
+        self.tb_path_val = (
+            Path("/tmp/log-tb/") / self.name / "validation").as_posix()
         self.save_path = (MODELS_DIR / self.name / ("model.ckpt")).as_posix()
 
     def _infer(self):
 
-        training_placeholder = tf.placeholder(tf.bool, shape=(), 
-                                                    name='train_mode')
+        training_placeholder = tf.placeholder(
+            tf.bool, shape=(), name='train_mode')
 
         logits = self.forward_pass_fn(
             train_mode_placeholder=training_placeholder)
@@ -123,7 +126,8 @@ class TfClassifier:
 
         return predictions, graph
 
-    def _split_and_batch(self, inputs, input_names, batch_size, validation_split):
+    def _split_and_batch(self, inputs, input_names, batch_size,
+                         validation_split):
 
         n_samples = inputs[0].shape[0]
         input_tensors = list(
@@ -198,35 +202,78 @@ class TfClassifier:
                 inputs, input_names, batch_size, validation_split)
 
             if verbosity >= 1:
-                summary_writer = tf.summary.FileWriter(self.tb_path,
-                                                       sess.graph)
-                print("Launch: tensorboard --logdir=" + self.tb_path)
+                summary_writer_train = tf.summary.FileWriter(
+                    self.tb_path_train, sess.graph)
+                summary_writer_validation = tf.summary.FileWriter(
+                    self.tb_path_val, sess.graph)
+
+                run_metadata = tf.RunMetadata()
+                run_options = tf.RunOptions(
+                    trace_level=tf.RunOptions.FULL_TRACE)
+                print(
+                    "For training: tensorboard --logdir=" + self.tb_path_train)
+                print(
+                    "For validation: tensorboard --logdir=" + self.tb_path_val)
                 i = 1
+            else:
+                run_metadata = None
+                run_options = None
 
             for e in range(1, epochs + 1):
                 sess.run(tf.local_variables_initializer())
 
                 for train_dict in train_LD:
-                    out = sess.run(ops, feed_dict=train_dict)
+                    if i % 20 == 0:
+                        run_metadata = tf.RunMetadata()
+                        run_options = tf.RunOptions(
+                            trace_level=tf.RunOptions.FULL_TRACE)
+
+                    out = sess.run(
+                        ops,
+                        feed_dict=train_dict,
+                        options=run_options,
+                        run_metadata=run_metadata)
+
                     if verbosity >= 1:
-                        summary_writer.add_summary(out["summaries"], i)
-                        summary_writer.flush()
+                        if i % 20 == 0:
+                            summary_writer_train.add_run_metadata(
+                                run_metadata, f'step{i}')
+                            run_metadata = None
+                            run_options = None
+
+                        summary_writer_train.add_summary(out["summaries"], i)
                         i = i + 1
-                    if verbosity == 2:
-                        print({x: out[x]
-                             for x in out if x in ["accuracy", "mse", "loss"]})
+
+                        if verbosity == 2:
+                            print({
+                                x: out[x]
+                                for x in out
+                                if x in ["accuracy", "mse", "loss"]
+                            })
+
+                if verbosity >= 1:
+                    run_metadata = tf.RunMetadata()
 
                 sess.run(tf.local_variables_initializer())
                 out = sess.run(
                     {x: ops[x]
                      for x in ops if x not in ["train_op"]},
-                    feed_dict=val_dict)
+                    feed_dict=val_dict,
+                    options=run_options,
+                    run_metadata=run_metadata)
+
+                if verbosity >= 1:
+                    summary_writer_validation.add_summary(out["summaries"], e)
+                    summary_writer_train.flush()
+                    summary_writer_validation.flush()
+
 
                 history.append(out)
-            
-            if verbosity >=1:
-                summary_writer.close()
-            
+
+            if verbosity >= 1:
+                summary_writer_train.close()
+                summary_writer_validation.close()
+
             saver.save(sess, self.save_path)
 
         return dict(

@@ -59,6 +59,8 @@ def eval_fn(predictions):
         tf.metrics.mean_squared_error(
             labels=labels, predictions=predictions["logits"])
     }
+    tf.summary.scalar("accuracy", eval_metrics["accuracy"][0])
+    tf.summary.scalar("mse", eval_metrics["mse"][0])
     return eval_metrics
 
 

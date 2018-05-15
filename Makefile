@@ -17,7 +17,8 @@ benchmark:
 	jupyter notebook Benchmarks.ipynb
 
 clean:
-	rm -r cnn/data
+	rm cnn/data/*
 	rm cnn/models/*
+	rm /tmp/log-tb/*
 
 .PHONY: init dense benchmarks clean
