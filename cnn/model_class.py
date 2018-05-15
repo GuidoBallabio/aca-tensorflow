@@ -6,6 +6,8 @@ from pathlib import Path
 
 from cnn.utils.save_models import MODELS_DIR
 
+MAX_BATCH_SIZE = 2000
+
 
 class TfClassifier:
     """Tensorflow-based classifier for NNs with simple API and quantization.
@@ -126,41 +128,82 @@ class TfClassifier:
 
         return predictions, graph
 
-    def _split_and_batch(self, inputs, input_names, batch_size,
-                         validation_split):
-
-        n_samples = inputs[0].shape[0]
+    def _init_dict(self, inputs, input_names):
         input_tensors = list(
             map(lambda n: tf.get_default_graph().get_tensor_by_name(n + ':0'),
                 input_names))
         input_DL = dict(zip(input_tensors, inputs))  # Dict from pairs of list
 
-        for k, v in input_DL.items():
-            input_DL[k] = np.split(v,
-                                   [round((1 - validation_split) * n_samples)])
+        return input_tensors, input_DL
 
-        input_LD = [dict(zip(input_DL, t))
-                    for t in zip(*input_DL.values())]  #List of Dicts
+    def _split_data_dict_in_perc(self, input_dict, n_samples, percs):
+        for k, v in input_dict.items():
+            input_dict[k] = np.split(v, (n_samples * percs).astype(np.int))
+
+        input_LD = [
+            dict(zip(input_dict, t)) for t in zip(*input_dict.values())
+        ]  #List of Dicts
+
+        return input_LD
+
+    def _batch_data_dict(self, input_dict, n_samples, batch_size):
+        n_batches, drop = np.divmod(n_samples, batch_size)
+
+        for k, v in input_dict.items():
+            input_dict[k] = np.array_split(v, n_batches)
+
+        out_LD = [dict(zip(input_dict, t)) for t in zip(*input_dict.values())]
+
+        return out_LD
+
+    def _set_train_mode_to_LD(self, input_LD, mode):
+        mode_d = {"train_mode:0": mode}
+        for d in input_LD:
+            d.update(mode_d)
+
+        return input_LD
+
+    def _init_dict_split_max(self, inputs, input_names):
+        input_dict = self._init_dict(inputs, input_names)
+        n_samples = inputs[0].shape[0]
+
+        if n_samples - n_train_samples > MAX_BATCH_SIZE:
+            out_LD = self._batch_data_dict(input_dict, n_samples,
+                                           MAX_BATCH_SIZE)
+        else:
+            out_LD = [input_dict]
+
+        return out_LD
+
+    def _split_and_batch(self, inputs, input_names, batch_size,
+                         validation_split):
+
+        n_samples = inputs[0].shape[0]
+
+        input_tensors, input_DL = self._init_dict(inputs, input_names)
+
+        input_LD = self._split_data_dict_in_perc(input_DL, n_samples,
+                                                 np.array(
+                                                     [1 - validation_split]))
 
         train_dict = input_LD[0]
         val_dict = input_LD[1]
 
         n_train_samples = train_dict[input_tensors[0]].shape[0]
-        n_batches, drop = np.divmod(n_train_samples, batch_size)
 
-        for k, v in train_dict.items():
-            train_dict[k] = np.array_split(v, n_batches)
+        train_LD = self._batch_data_dict(train_dict, n_train_samples,
+                                         batch_size)
 
-        train_LD = [
-            dict(zip(train_dict, t)) for t in zip(*train_dict.values())
-        ]
+        if n_samples - n_train_samples > MAX_BATCH_SIZE:
+            val_LD = self._batch_data_dict(
+                val_dict, n_samples - n_train_samples, MAX_BATCH_SIZE)
+        else:
+            val_LD = [val_dict]
 
-        val_dict.update({"train_mode:0": False})
-        mode_t = {"train_mode:0": True}
-        for d in train_LD:
-            d.update(mode_t)
+        train_LD = sel._set_train_mode_to_LD(train_LD, True)
+        val_LD = sel._set_train_mode_to_LD(val_LD, False)
 
-        return train_LD, val_dict
+        return train_LD, val_LD
 
     def fit(self,
             inputs,
@@ -267,7 +310,6 @@ class TfClassifier:
                     summary_writer_train.flush()
                     summary_writer_validation.flush()
 
-
                 history.append(out)
 
             if verbosity >= 1:
@@ -296,12 +338,10 @@ class TfClassifier:
 
         ops, graph = self.predict_ops_graph
 
-        input_tensors = map(tf.get_default_graph().get_tensor_by_name,
-                            input_names)
-        input_dict = dict(zip(input_tensors, inputs))
-        input_dict.update({self._training_placeholder: False})
-
         with tf.Session(graph=graph) as sess:
+            input_LD = self._init_dict_split_max(inputs, input_names)
+            input_LD = self._set_train_mode_to_LD(input_LD, False)
+
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
             saver.restore(sess, self.save_path)
@@ -329,12 +369,10 @@ class TfClassifier:
 
         ops, graph = self.eval_ops_graph
 
-        input_tensors = map(tf.get_default_graph().get_tensor_by_name,
-                            input_names)
-        input_dict = dict(zip(input_tensors, inputs))
-        input_dict.update({self._training_placeholder: False})
-
         with tf.Session(graph=graph) as sess:
+            input_LD = self._init_dict_split_max(inputs, input_names)
+            input_LD = self._set_train_mode_to_LD(input_LD, False)
+
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
             saver.restore(sess, self.save_path)

@@ -32,7 +32,7 @@ def forward_pass(train_mode_placeholder=None):
         activation=tf.nn.relu)
 
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=(2, 2), strides=2)
-    
+
     pool2_flat = tf.layers.flatten(pool2)
 
     dense = tf.layers.dense(
@@ -53,7 +53,8 @@ def eval_fn(predictions):
     labels = tf.get_default_graph().get_tensor_by_name("labels:0")
     eval_metrics = {
         "accuracy":
-        tf.metrics.accuracy(labels=tf.argmax(labels, axis=1), 
+        tf.metrics.accuracy(
+            labels=tf.argmax(labels, axis=1),
             predictions=predictions["classes"]),
         "mse":
         tf.metrics.mean_squared_error(
@@ -68,11 +69,15 @@ if __name__ == '__main__':
     x_train, t_train, x_test, t_test = load_cifar10()
 
     x_train = dataset_preprocessing_by_keras(x_train)
-    
+
     model = TfClassifier(NET_NAME, forward_pass, loss_fn, eval_fn,
                          tf.train.AdamOptimizer())
     history = model.fit(
-        [x_train, t_train], batch_size=BATCH_SIZE, validation_split=0.1, epochs=1, verbosity=1)
+        [x_train, t_train],
+        batch_size=BATCH_SIZE,
+        validation_split=0.2,
+        epochs=EPOCHS,
+        verbosity=1)
 
     print(history)
 
