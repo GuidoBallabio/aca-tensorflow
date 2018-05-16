@@ -3,15 +3,15 @@
 import numpy as np
 import tensorflow as tf
 
-from cnn.utils.dataset import load_cifar10, dataset_preprocessing_by_keras
 from cnn.model_class import TfClassifier
+from cnn.utils.dataset import dataset_preprocessing_by_keras, load_cifar10
 
 BATCH_SIZE = 64
 NET_NAME = 'dense_cnn'
 EPOCHS = 50
 
 
-def forward_pass(train_mode_placeholder=None):
+def forward_pass(train_mode_placeholder):
     features = tf.placeholder(
         tf.float32, shape=(None, 32, 32, 3), name="features")
 
@@ -46,6 +46,7 @@ def forward_pass(train_mode_placeholder=None):
 
 def loss_fn(logits):
     labels = tf.placeholder(tf.float32, [None, 10], name="labels")
+
     return tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
 
 
@@ -62,6 +63,7 @@ def eval_fn(predictions):
     }
     tf.summary.scalar("accuracy", eval_metrics["accuracy"][0])
     tf.summary.scalar("mse", eval_metrics["mse"][0])
+
     return eval_metrics
 
 

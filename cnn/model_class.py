@@ -1,8 +1,11 @@
 """Module implementig TfClassifier class."""
 
+from pathlib import Path
+
 import numpy as np
 import tensorflow as tf
-from pathlib import Path
+from tensorflow.python.framework import graph_io, graph_util
+from tensorflow.tools.graph_transforms import TransformGraph
 
 from cnn.utils.save_models import MODELS_DIR
 
@@ -11,7 +14,7 @@ HALF_MAX_BATCH_SIZE = 2000
 
 class TfClassifier:
     """Tensorflow-based classifier for NNs with simple API and quantization.
-    
+
     This class wraps a forward pass part of a Neural Network graph as well as 
     the loss function and the optimizer, exposing a simple interface. 
     """
@@ -27,9 +30,11 @@ class TfClassifier:
 
          Args:
             name (str): Name of the model and used for files written on disk.
+
             forward_pass_fn (function): Main model function: forward pass.
                 This funcion must accept a single parameter of type
                 tf.placeholder(tf.bool, shape=()) that enables training mode,
+
                 if the parameter is set to True then the func is in training.
                 The function must return logits as tensor.
                 Placeholders must be used for inputs with names.
@@ -40,8 +45,8 @@ class TfClassifier:
             eval_fn (function): Description of `param3`.
             optimizer (function): Instance of a :class:`tf.Optimazer` subclass.
             quantization (bool, optional): If True enables fake quantization 
-                and :method:`freeze` will implement a real quantization
-                transformation on the graph.
+                and :method:`freeze` will enable to implement a real 
+                quantization through the command line tool GraphTransform.
         """
 
         self.name = name
@@ -57,7 +62,7 @@ class TfClassifier:
             Path("/tmp/log-tb/") / self.name / "training").as_posix()
         self.tb_path_val = (
             Path("/tmp/log-tb/") / self.name / "validation").as_posix()
-        self.save_path = (MODELS_DIR / self.name / ("model.ckpt")).as_posix()
+        self.save_path = MODELS_DIR / self.name / "model.ckpt"
 
     def _infer(self):
 
@@ -78,6 +83,7 @@ class TfClassifier:
     def _calculate_loss(self, logits):
         loss = self.loss_fn(logits=logits)
         tf.summary.scalar("loss", loss)
+
         return loss
 
     def _optimize(self, loss):
@@ -129,8 +135,10 @@ class TfClassifier:
         return predictions, graph
 
     def _init_dict(self, inputs, input_names):
-        input_tensors = [tf.get_default_graph().get_tensor_by_name(n + ':0') for
-                            n in input_names]
+        input_tensors = [
+            tf.get_default_graph().get_tensor_by_name(n + ':0')
+            for n in input_names
+        ]
         input_DL = dict(zip(input_tensors, inputs))  # Dict from pairs of list
 
         return input_tensors, input_DL
@@ -141,7 +149,7 @@ class TfClassifier:
 
         input_LD = [
             dict(zip(input_dict, t)) for t in zip(*input_dict.values())
-        ]  #List of Dicts
+        ]  # List of Dicts
 
         return input_LD
 
@@ -157,6 +165,7 @@ class TfClassifier:
 
     def _set_train_mode_to_LD(self, input_LD, mode):
         mode_d = {"train_mode:0": mode}
+
         for d in input_LD:
             d.update(mode_d)
 
@@ -190,8 +199,8 @@ class TfClassifier:
         train_LD = self._batch_data_dict(train_dict, n_train_samples,
                                          batch_size)
 
-        val_LD = self._batch_data_dict(
-                val_dict, n_samples - n_train_samples, HALF_MAX_BATCH_SIZE)
+        val_LD = self._batch_data_dict(val_dict, n_samples - n_train_samples,
+                                       HALF_MAX_BATCH_SIZE)
 
         train_LD = self._set_train_mode_to_LD(train_LD, True)
         val_LD = self._set_train_mode_to_LD(val_LD, False)
@@ -206,7 +215,7 @@ class TfClassifier:
             epochs=1,
             verbosity=0):
         """Train the model with given data and optiions.
-        
+
         Args:
             inputs(list of np.ndarray): Data as list of arrays, one of which
                 must be the labels.
@@ -218,6 +227,7 @@ class TfClassifier:
             epochs(int): The number of epochs to train (epochs >= 1).
             verbosity(int): If 0 will log only in the returned history. 
                 If 1 tensorboard summaries will be written.
+
                 If 2 result of ops will be printed for every batch (slow).
 
         Returns:
@@ -287,7 +297,8 @@ class TfClassifier:
                                 if x in ["accuracy", "mse", "loss"]
                             })
 
-                sess.run(tf.local_variables_initializer())                
+                sess.run(tf.local_variables_initializer())
+
                 for val_dict in val_LD:
 
                     if verbosity >= 1:
@@ -301,7 +312,8 @@ class TfClassifier:
                         run_metadata=run_metadata)
 
                     if verbosity >= 1:
-                        summary_writer_validation.add_summary(out["summaries"], e)
+                        summary_writer_validation.add_summary(
+                            out["summaries"], e)
                         summary_writer_train.flush()
                         summary_writer_validation.flush()
 
@@ -311,15 +323,15 @@ class TfClassifier:
                 summary_writer_train.close()
                 summary_writer_validation.close()
 
-            saver.save(sess, self.save_path)
+            saver.save(sess, self.save_path.as_posix())
 
         return dict(
             zip(history[0],
-                zip(*[out.values() for out in history])))  #Dict of lists
+                zip(*[out.values() for out in history])))  # Dict of lists
 
     def predict(self, inputs, input_names=["features"]):
         """Make predictions on the given data, by a trained model.
-        
+
         Args:
             inputs(list of np.ndarray): Data as list of arrays.
             input_names(list of str): Names of inputs as used in the 
@@ -339,10 +351,11 @@ class TfClassifier:
 
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
-            saver.restore(sess, self.save_path)
-            
+            saver.restore(sess, self.save_path.as_posix())
+
             sess.run(tf.local_variables_initializer())
             out = []
+
             for input_dict in input_LD:
                 out.append(sess.run(ops, feed_dict=input_dict))
 
@@ -350,7 +363,7 @@ class TfClassifier:
 
     def evaluate(self, inputs, input_names=["features", "labels"]):
         """Evaluate trained model on the given data.
-        
+
         Args:
             inputs(list of np.ndarray): Data as list of arrays, one of which
                 must be the labels.
@@ -373,31 +386,67 @@ class TfClassifier:
 
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
-            saver.restore(sess, self.save_path)
-            
+            saver.restore(sess, self.save_path.as_posix())
+
             sess.run(tf.local_variables_initializer())
             out = []
+
             for input_dict in input_LD:
                 out.append(sess.run(ops, feed_dict=input_dict))
 
         return out
 
-    def freeze(self, path):
-        """Freezes the prediction graph and writes it to disk.
-        
-        Args:
-            path(str): Absolute string representing path to dir.
-            
-        Returns:
-            Absolute path to the written file.
+    def freeze_graph(self,
+                     graph=self.predict_ops_graph[1],
+                     output_names=['softmax']):
+        """Freeze the prediction graph with last saved data and write it to disk.
 
-        Variables becomes constants, eventually performs quantization if 
-        enabled at construction time.
-        The file will be written to the given path as "self.name + '.pb'",
+        Args:
+            graph: Graph to freeze, defaults to self.predict_graph
+            output_names: List of strings. Names of output op
+
+        The file will be written to the model dir as "self.name + '.pb'",
         in ProtoBuff format.
         """
-        pass
 
-    def _transform():
-        """Apply transformations to a graph"""
-        pass
+        with tf.Session(graph=graph) as sess:
+            saver = tf.train.Saver()
+            sess.run(tf.global_variables_initializer())
+            saver.restore(sess, self.save_path.as_posix())
+
+            constant_graph = graph_util.convert_variables_to_constants(
+                sess, sess.graph.as_graph_def(), output_names)
+            graph_io.write_graph(
+                constant_graph,
+                self.save_path.parent.as_posix(),
+                'model.pb',
+                as_text=False)
+
+    def optimize_for_inference(self,
+                               add_transf=[],
+                               input_names=['features'],
+                               output_names=['softmax']):
+        """Optmize the model graph for inference, quantize if constructed for it.
+
+        Args:
+            add_transf: Additional transformation to apply.
+
+        Returns:
+            The transformed optimized graph. If quantization was enabled at
+            construction time then it will be finalized (from fake to real).
+        """
+        transforms = [
+            "strip_unused_nodes(type=float, shape='1,299,299,3')",
+            "remove_nodes(op=Identity, op=CheckNumerics)",
+            "fold_constants(ignore_errors=true)", "fold_batch_norms",
+            "fold_batch_norms", "fold_old_batch_norms"
+        ]
+
+        if self.fake_quantization:
+            transforms = ["add_default_attributes"] + transforms + [
+                "quantize_weights", "quantize_nodes", "strip_unused_nodes",
+                "sort_by_execution_order"
+            ]
+
+        return TransformGraph(self.predict_graph[1], input_names, output_names,
+                              transforms)

@@ -7,8 +7,27 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-
 MODELS_DIR = Path(__file__).parent.parent / 'models'
+
+
+def load_frozen_graph(frozen_graph_filename):
+    # We load the protobuf file from the disk and parse it to retrieve the
+    # unserialized graph_def
+    with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(f.read())
+
+    graph = tf.Graph()
+    # Then, we import the graph_def into a new Graph and returns it
+    with graph.as_default():
+        # The name var will prefix every op/nodes in your graph
+        # Since we load everything in a new graph, this is not needed
+        tf.import_graph_def(graph_def, name='')
+    
+    input_name = graph.get_operations()[0].name + ':0'
+    output_name = graph.get_operations()[-1].name + ':0'
+
+    return graph, input_name, output_name
 
 
 def model_to_estimator(model):
@@ -21,9 +40,7 @@ def model_to_estimator(model):
     """
 
     return keras.estimator.model_to_estimator(
-            keras_model=model,
-            model_dir=(MODELS_DIR / model.name).absolute()
-            )
+        keras_model=model, model_dir=(MODELS_DIR / model.name).absolute())
 
 
 def convert_input_to_est_format(x, t, names, epochs):
@@ -35,10 +52,7 @@ def convert_input_to_est_format(x, t, names, epochs):
     """
 
     return tf.estimator.inputs.numpy_input_fn(
-        x={names[0]: x},
-        y=t,
-        num_epochs=epochs,
-        shuffle=False)
+        x={names[0]: x}, y=t, num_epochs=epochs, shuffle=False)
 
 
 def save_model(model):

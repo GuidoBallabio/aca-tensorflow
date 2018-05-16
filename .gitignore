@@ -1,4 +1,4 @@
-cnn/data/
+cnn/data/*
 cnn/models/dense_cnn/*
 .Makef*
 
