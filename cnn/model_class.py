@@ -6,7 +6,7 @@ from pathlib import Path
 
 from cnn.utils.save_models import MODELS_DIR
 
-MAX_BATCH_SIZE = 2000
+HALF_MAX_BATCH_SIZE = 2000
 
 
 class TfClassifier:
@@ -129,9 +129,8 @@ class TfClassifier:
         return predictions, graph
 
     def _init_dict(self, inputs, input_names):
-        input_tensors = list(
-            map(lambda n: tf.get_default_graph().get_tensor_by_name(n + ':0'),
-                input_names))
+        input_tensors = [tf.get_default_graph().get_tensor_by_name(n + ':0') for
+                            n in input_names]
         input_DL = dict(zip(input_tensors, inputs))  # Dict from pairs of list
 
         return input_tensors, input_DL
@@ -167,11 +166,8 @@ class TfClassifier:
         input_dict = self._init_dict(inputs, input_names)[1]
         n_samples = inputs[0].shape[0]
 
-        if n_samples > MAX_BATCH_SIZE:
-            out_LD = self._batch_data_dict(input_dict, n_samples,
-                                           MAX_BATCH_SIZE)
-        else:
-            out_LD = [input_dict]
+        out_LD = self._batch_data_dict(input_dict, n_samples,
+                                       HALF_MAX_BATCH_SIZE)
 
         return out_LD
 
@@ -194,11 +190,8 @@ class TfClassifier:
         train_LD = self._batch_data_dict(train_dict, n_train_samples,
                                          batch_size)
 
-        if n_samples - n_train_samples > MAX_BATCH_SIZE:
-            val_LD = self._batch_data_dict(
-                val_dict, n_samples - n_train_samples, MAX_BATCH_SIZE)
-        else:
-            val_LD = [val_dict]
+        val_LD = self._batch_data_dict(
+                val_dict, n_samples - n_train_samples, HALF_MAX_BATCH_SIZE)
 
         train_LD = self._set_train_mode_to_LD(train_LD, True)
         val_LD = self._set_train_mode_to_LD(val_LD, False)

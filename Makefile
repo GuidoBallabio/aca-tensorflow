@@ -13,6 +13,9 @@ conv:
 complex:
 
 
+test:
+	python -m pytest
+
 benchmark:
 	jupyter notebook Benchmarks.ipynb
 
