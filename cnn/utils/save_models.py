@@ -24,7 +24,7 @@ def load_frozen_graph(frozen_graph_filename):
         # Since we load everything in a new graph, this is not needed
         tf.import_graph_def(graph_def, name='')
     
-    input_names = [graph.get_operations()[1].name]
+    input_names = [graph.get_operations()[0].name]
     output_names = [graph.get_operations()[-1].name]
 
     return graph, input_names, output_names

@@ -64,13 +64,11 @@ class TfClassifier:
             Path("/tmp/log-tb/") / self.name / "validation").as_posix()
         self.save_path = MODELS_DIR / self.name / "model.ckpt"
 
-    def _infer(self):
+    def _infer(self, train_mode=False):
 
-        training_placeholder = tf.placeholder(
-            tf.bool, shape=(), name='train_mode')
-
-        logits = self.forward_pass_fn(
-            train_mode_placeholder=training_placeholder)
+        self.keep_prob_placeholder = tf.placeholder(tf.float, (), name="keep_prob")
+        
+        logits = self.forward_pass_fn(train_mode, self.keep_prob_placeholder)
 
         predictions = {
             "logits": logits,
@@ -96,7 +94,7 @@ class TfClassifier:
         graph = tf.Graph()
 
         with graph.as_default() as g:
-            predictions = self._infer()
+            predictions = self._infer(train_mode=True)
             loss = self._calculate_loss(predictions["logits"])
             train_op = self._optimize(loss)
             evals = self._evaluate_op(predictions)
@@ -163,8 +161,8 @@ class TfClassifier:
 
         return out_LD
 
-    def _set_train_mode_to_LD(self, input_LD, mode):
-        mode_d = {"train_mode:0": mode}
+    def _set_keep_prob_to_LD(self, input_LD, keep_prob):
+        mode_d = {"keep_prob:0": keep_prob}
 
         for d in input_LD:
             d.update(mode_d)
@@ -181,7 +179,7 @@ class TfClassifier:
         return out_LD
 
     def _split_and_batch(self, inputs, input_names, batch_size,
-                         validation_split):
+                         validation_split, keep_prob):
 
         n_samples = inputs[0].shape[0]
 
@@ -202,8 +200,9 @@ class TfClassifier:
         val_LD = self._batch_data_dict(val_dict, n_samples - n_train_samples,
                                        HALF_MAX_BATCH_SIZE)
 
-        train_LD = self._set_train_mode_to_LD(train_LD, True)
-        val_LD = self._set_train_mode_to_LD(val_LD, False)
+        if keep_prob is not None:
+            train_LD = self._set_keep_prob_to_LD(train_LD, keep_prob)
+            val_LD = self._set_keep_prob_to_LD(val_LD, 1.0)
 
         return train_LD, val_LD
 
@@ -213,7 +212,8 @@ class TfClassifier:
             batch_size=1,
             validation_split=0,
             epochs=1,
-            verbosity=0):
+            verbosity=0,
+            keep_prob=None):
         """Train the model with given data and optiions.
 
         Args:
@@ -226,9 +226,9 @@ class TfClassifier:
                 validation (as such 0 <= validation_split < 1).
             epochs(int): The number of epochs to train (epochs >= 1).
             verbosity(int): If 0 will log only in the returned history. 
-                If 1 tensorboard summaries will be written.
-
-                If 2 result of ops will be printed for every batch (slow).
+                If 1 tensorboard summaries will be written. If 2 result of ops
+                will be printed for every batch (slow).
+            keep_prob(float): Eventual keep_prob for dropout
 
         Returns:
             The history of the training: Dictionary of the result of every of 
@@ -245,7 +245,7 @@ class TfClassifier:
             sess.run(tf.global_variables_initializer())
 
             train_LD, val_LD = self._split_and_batch(
-                inputs, input_names, batch_size, validation_split)
+                inputs, input_names, batch_size, validation_split, keep_prob)
 
             if verbosity >= 1:
                 summary_writer_train = tf.summary.FileWriter(
@@ -347,7 +347,6 @@ class TfClassifier:
 
         with tf.Session(graph=graph) as sess:
             input_LD = self._init_dict_split_max(inputs, input_names)
-            input_LD = self._set_train_mode_to_LD(input_LD, False)
 
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
@@ -382,7 +381,6 @@ class TfClassifier:
 
         with tf.Session(graph=graph) as sess:
             input_LD = self._init_dict_split_max(inputs, input_names)
-            input_LD = self._set_train_mode_to_LD(input_LD, False)
 
             saver = tf.train.Saver()
             sess.run(tf.global_variables_initializer())
@@ -395,6 +393,20 @@ class TfClassifier:
                 out.append(sess.run(ops, feed_dict=input_dict))
 
         return out
+
+    def load_model(self):
+        """Load previously frozen model as graph with input and output names.
+
+        
+        Returns:
+            The graph of the frozel model as well as input and output names for
+            further use
+            
+        Under the hood uses general functions, just a wrapper with model 
+        embedded info such as names and path.
+        """
+        return load_frozen_graph(
+            (MODELS_DIR / model.name / 'model.pb').as_posix())
 
     def freeze_graph(self, graph=None, output_names=['softmax']):
         """Freeze the prediction graph with last saved data and write it to disk.

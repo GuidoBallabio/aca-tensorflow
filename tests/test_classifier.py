@@ -7,7 +7,7 @@ from cnn.model_class import TfClassifier, HALF_MAX_BATCH_SIZE
 
 
 def fake_tfclassifier():
-    def fp_fn(train_mode_placeholder):
+    def fp_fn(train_mode, keep_prob_placeholder):
         inputs = tf.placeholder(
             tf.float32, shape=[None, 2, 2, 2], name="features")
         flat = tf.layers.flatten(inputs)

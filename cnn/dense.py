@@ -11,7 +11,7 @@ NET_NAME = 'dense_cnn'
 EPOCHS = 50
 
 
-def forward_pass(train_mode_placeholder):
+def forward_pass(train_mode, keep_prob_placeholder):
     features = tf.placeholder(
         tf.float32, shape=(None, 32, 32, 3), name="features")
 
@@ -39,7 +39,7 @@ def forward_pass(train_mode_placeholder):
         inputs=pool2_flat, units=1024, activation=tf.nn.relu)
 
     dropout = tf.layers.dropout(
-        inputs=dense, rate=0.4, training=train_mode_placeholder)
+        inputs=dense, rate=keep_prob_placeholder, training=train_mode)
 
     return tf.layers.dense(inputs=dropout, units=10, name="logits")
 
