@@ -4,10 +4,8 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.framework import graph_io, graph_util
-from tensorflow.tools.graph_transforms import TransformGraph
 
-from cnn.utils.save_models import MODELS_DIR
+from cnn.utils.save_models import MODELS_DIR, load_frozen_graph, write_graph, transform_graph
 
 HALF_MAX_BATCH_SIZE = 2000
 
@@ -66,8 +64,9 @@ class TfClassifier:
 
     def _infer(self, train_mode=False):
 
-        self.keep_prob_placeholder = tf.placeholder(tf.float, (), name="keep_prob")
-        
+        self.keep_prob_placeholder = tf.placeholder(
+            tf.float32, (), name="keep_prob")
+
         logits = self.forward_pass_fn(train_mode, self.keep_prob_placeholder)
 
         predictions = {
@@ -429,10 +428,10 @@ class TfClassifier:
 
             constant_graph = graph_util.convert_variables_to_constants(
                 sess, sess.graph.as_graph_def(), output_names)
-            graph_io.write_graph(
+            write_graph(
                 constant_graph,
-                self.save_path.parent.as_posix(),
                 'model.pb',
+                self.save_path.parent.as_posix(),
                 as_text=False)
 
     def optimize_for_inference(self,
@@ -450,14 +449,14 @@ class TfClassifier:
             construction time then it will be finalized (from fake to real).
         """
         transforms = [
-            "strip_unused_nodes",
+            "strip_unused_nodes(type=float)",
             "remove_nodes(op=Identity, op=CheckNumerics)",
             "fold_constants(ignore_errors=true)", "fold_batch_norms",
-            "fold_old_batch_norms"
+            "fold_old_batch_norms", "sort_by_execution_order"
         ]
 
         if self.fake_quantization:
-            transforms = ["add_default_attributes"] + transforms + [
+            transforms = ["add_default_attributes"] + transforms[:-1] + [
                 "quantize_weights", "quantize_nodes", "sort_by_execution_order"
             ]
 
@@ -468,11 +467,4 @@ class TfClassifier:
         if graph is None:
             graph = self.predict_ops_graph[1]
 
-        out_graph_def = TransformGraph(graph.as_graph_def(), input_names,
-                                       output_names, transforms)
-
-        out_graph = tf.Graph()
-        with out_graph.as_default():
-            tf.import_graph_def(out_graph_def, name='')
-
-        return out_graph
+        return transform_graph(graph, input_names, output_names, transforms)

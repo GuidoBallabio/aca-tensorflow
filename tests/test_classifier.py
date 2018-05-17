@@ -47,7 +47,7 @@ def test_split_and_batch():
 
     with tf.Session(graph=model.train_ops_graph[1]) as s:
         split = model._split_and_batch(inputs, input_names, batch_size,
-                                       validation_split)
+                                       validation_split, 0.5)
         input_tensors = [
             tf.get_default_graph().get_tensor_by_name(n + ':0')
             for n in input_names

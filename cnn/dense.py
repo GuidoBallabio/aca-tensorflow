@@ -5,6 +5,7 @@ import tensorflow as tf
 
 from cnn.model_class import TfClassifier
 from cnn.utils.dataset import dataset_preprocessing_by_keras, load_cifar10
+from cnn.utils.save_models import write_graph
 
 BATCH_SIZE = 64
 NET_NAME = 'dense_cnn'
@@ -79,10 +80,16 @@ if __name__ == '__main__':
         batch_size=BATCH_SIZE,
         validation_split=0.2,
         epochs=EPOCHS,
-        verbosity=1)
+        verbosity=1,
+        keep_prob=0.5)
 
     print(history)
 
     evals = model.evaluate([x_test, t_test])
 
     print(evals)
+
+    model.freeze_graph()
+    opt_graph = model.optimize_for_inference(model.load_model())
+    
+    write_graph(graph, 'dense_cnn_opt.pb')
