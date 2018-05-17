@@ -24,10 +24,10 @@ def load_frozen_graph(frozen_graph_filename):
         # Since we load everything in a new graph, this is not needed
         tf.import_graph_def(graph_def, name='')
     
-    input_name = graph.get_operations()[0].name + ':0'
-    output_name = graph.get_operations()[-1].name + ':0'
+    input_names = [graph.get_operations()[1].name]
+    output_names = [graph.get_operations()[-1].name]
 
-    return graph, input_name, output_name
+    return graph, input_names, output_names
 
 
 def model_to_estimator(model):

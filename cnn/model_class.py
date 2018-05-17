@@ -396,9 +396,7 @@ class TfClassifier:
 
         return out
 
-    def freeze_graph(self,
-                     graph=self.predict_ops_graph[1],
-                     output_names=['softmax']):
+    def freeze_graph(self, graph=None, output_names=['softmax']):
         """Freeze the prediction graph with last saved data and write it to disk.
 
         Args:
@@ -408,6 +406,9 @@ class TfClassifier:
         The file will be written to the model dir as "self.name + '.pb'",
         in ProtoBuff format.
         """
+
+        if graph is None:
+            graph = self.predict_ops_graph[1]
 
         with tf.Session(graph=graph) as sess:
             saver = tf.train.Saver()
@@ -425,7 +426,8 @@ class TfClassifier:
     def optimize_for_inference(self,
                                add_transf=[],
                                input_names=['features'],
-                               output_names=['softmax']):
+                               output_names=['softmax'],
+                               graph=None):
         """Optmize the model graph for inference, quantize if constructed for it.
 
         Args:
@@ -436,17 +438,29 @@ class TfClassifier:
             construction time then it will be finalized (from fake to real).
         """
         transforms = [
-            "strip_unused_nodes(type=float, shape='1,299,299,3')",
+            "strip_unused_nodes",
             "remove_nodes(op=Identity, op=CheckNumerics)",
             "fold_constants(ignore_errors=true)", "fold_batch_norms",
-            "fold_batch_norms", "fold_old_batch_norms"
+            "fold_old_batch_norms"
         ]
 
         if self.fake_quantization:
             transforms = ["add_default_attributes"] + transforms + [
-                "quantize_weights", "quantize_nodes", "strip_unused_nodes",
-                "sort_by_execution_order"
+                "quantize_weights", "quantize_nodes", "sort_by_execution_order"
             ]
 
-        return TransformGraph(self.predict_graph[1], input_names, output_names,
-                              transforms)
+        for transf in add_transf:
+            if transf not in transforms:
+                transforms.append(transf)
+
+        if graph is None:
+            graph = self.predict_ops_graph[1]
+
+        out_graph_def = TransformGraph(graph.as_graph_def(), input_names,
+                                       output_names, transforms)
+
+        out_graph = tf.Graph()
+        with out_graph.as_default():
+            tf.import_graph_def(out_graph_def, name='')
+
+        return out_graph
