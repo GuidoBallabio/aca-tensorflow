@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.framework import graph_util
 
 from cnn.utils.save_models import MODELS_DIR, load_frozen_graph, write_graph, transform_graph
 
@@ -184,9 +185,8 @@ class TfClassifier:
 
         input_tensors, input_DL = self._init_dict(inputs, input_names)
 
-        input_LD = self._split_data_dict_in_perc(input_DL, n_samples,
-                                                 np.array(
-                                                     [1 - validation_split]))
+        input_LD = self._split_data_dict_in_perc(
+            input_DL, n_samples, np.array([1 - validation_split]))
 
         train_dict = input_LD[0]
         val_dict = input_LD[1]
@@ -255,10 +255,10 @@ class TfClassifier:
                 run_metadata = tf.RunMetadata()
                 run_options = tf.RunOptions(
                     trace_level=tf.RunOptions.FULL_TRACE)
-                print(
-                    "For training: tensorboard --logdir=" + self.tb_path_train)
-                print(
-                    "For validation: tensorboard --logdir=" + self.tb_path_val)
+                print("For training: tensorboard --logdir=" +
+                      self.tb_path_train)
+                print("For validation: tensorboard --logdir=" +
+                      self.tb_path_val)
                 i = 1
             else:
                 run_metadata = None
@@ -293,7 +293,7 @@ class TfClassifier:
                             print({
                                 x: out[x]
                                 for x in out
-                                if x in ["accuracy", "mse", "loss"]
+                                if x in ["accuracy", "loss"]
                             })
 
                 sess.run(tf.local_variables_initializer())
@@ -316,7 +316,11 @@ class TfClassifier:
                         summary_writer_train.flush()
                         summary_writer_validation.flush()
 
-                history.append(out)
+                history.append({
+                                x: out[x]
+                                for x in out
+                                if x in ["accuracy", "loss"]
+                            })
 
             if verbosity >= 1:
                 summary_writer_train.close()
@@ -405,9 +409,23 @@ class TfClassifier:
         embedded info such as names and path.
         """
         return load_frozen_graph(
-            (MODELS_DIR / model.name / 'model.pb').as_posix())
+            (MODELS_DIR / self.name / 'model.pb').as_posix())
 
-    def freeze_graph(self, graph=None, output_names=['softmax']):
+    def _freeze_graph(self, graph=None, output_names=['softmax']):
+        if graph is None:
+            graph = self.predict_ops_graph[1]
+
+        with tf.Session(graph=graph) as sess:
+            saver = tf.train.Saver()
+            sess.run(tf.global_variables_initializer())
+            saver.restore(sess, self.save_path.as_posix())
+
+            constant_graph_def = graph_util.convert_variables_to_constants(
+                sess, sess.graph.as_graph_def(), output_names)
+
+        return constant_graph_def
+
+    def save_frozen_graph(self):
         """Freeze the prediction graph with last saved data and write it to disk.
 
         Args:
@@ -417,32 +435,19 @@ class TfClassifier:
         The file will be written to the model dir as "self.name + '.pb'",
         in ProtoBuff format.
         """
-
-        if graph is None:
-            graph = self.predict_ops_graph[1]
-
-        with tf.Session(graph=graph) as sess:
-            saver = tf.train.Saver()
-            sess.run(tf.global_variables_initializer())
-            saver.restore(sess, self.save_path.as_posix())
-
-            constant_graph = graph_util.convert_variables_to_constants(
-                sess, sess.graph.as_graph_def(), output_names)
-            write_graph(
-                constant_graph,
-                'model.pb',
-                self.save_path.parent.as_posix(),
-                as_text=False)
+        write_graph(self._freeze_graph(), 'model.pb',
+                        self.save_path.parent.as_posix())
 
     def optimize_for_inference(self,
                                add_transf=[],
                                input_names=['features'],
                                output_names=['softmax'],
-                               graph=None):
-        """Optmize the model graph for inference, quantize if constructed for it.
+                               graph_def=None):
+        """Optimize the model graph for inference, quantize if constructed for it.
 
         Args:
             add_transf: Additional transformation to apply.
+            
 
         Returns:
             The transformed optimized graph. If quantization was enabled at
@@ -464,7 +469,7 @@ class TfClassifier:
             if transf not in transforms:
                 transforms.append(transf)
 
-        if graph is None:
-            graph = self.predict_ops_graph[1]
+        if graph_def is None:
+            graph_def = self._freeze_graph()
 
-        return transform_graph(graph, input_names, output_names, transforms)
+        return transform_graph(graph_def, input_names, output_names, transforms)

@@ -6,13 +6,14 @@ import h5py
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.python.framework import graph_io, graph_util
+from tensorflow.python.framework import graph_util
+from tensorflow.tools.graph_transforms import TransformGraph
 
 MODELS_DIR = Path(__file__).parent.parent / 'models'
 
 
-def transform_graph(graph, input_names, output_names, transforms):
-    out_graph_def = TransformGraph(graph.as_graph_def(), input_names,
+def transform_graph(graph_def, input_names, output_names, transforms):
+    out_graph_def = TransformGraph(graph_def, input_names,
                                    output_names, transforms)
 
     out_graph = tf.Graph()
@@ -23,7 +24,7 @@ def transform_graph(graph, input_names, output_names, transforms):
 
 
 def write_graph(graph, name, dir_path=MODELS_DIR.as_posix()):
-    graph_io.write_graph(graph, dir_path, name, as_text=False)
+    tf.train.write_graph(graph, dir_path, name, as_text=False)
 
 
 def load_frozen_graph(frozen_graph_filename):
@@ -40,10 +41,7 @@ def load_frozen_graph(frozen_graph_filename):
         # Since we load everything in a new graph, this is not needed
         tf.import_graph_def(graph_def, name='')
 
-    input_names = [graph.get_operations()[0].name]
-    output_names = [graph.get_operations()[-1].name]
-
-    return graph, input_names, output_names
+    return graph
 
 
 def model_to_estimator(model):

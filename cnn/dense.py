@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     print(evals)
 
-    model.freeze_graph()
-    opt_graph = model.optimize_for_inference(model.load_model())
+    model.save_frozen_graph()
+    opt_graph = model.optimize_for_inference()
     
     write_graph(graph, 'dense_cnn_opt.pb')
