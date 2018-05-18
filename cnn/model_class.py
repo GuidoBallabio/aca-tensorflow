@@ -65,8 +65,8 @@ class TfClassifier:
 
     def _infer(self, train_mode=False):
 
-        self.keep_prob_placeholder = tf.placeholder(
-            tf.float32, (), name="keep_prob")
+        self.keep_prob_placeholder = tf.placeholder_with_default(1.0,
+            (), name="keep_prob")
 
         logits = self.forward_pass_fn(train_mode, self.keep_prob_placeholder)
 
