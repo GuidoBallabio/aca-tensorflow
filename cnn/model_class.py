@@ -282,7 +282,7 @@ class TfClassifier:
                     if verbosity >= 1:
                         if i % 20 == 0:
                             summary_writer_train.add_run_metadata(
-                                run_metadata, f'step{i}')
+                                run_metadata, "step" + str(i))
                             run_metadata = None
                             run_options = None
 
