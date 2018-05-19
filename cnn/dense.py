@@ -7,7 +7,7 @@ from cnn.model_class import TfClassifier
 from cnn.utils.dataset import dataset_preprocessing_by_keras, load_cifar10
 from cnn.utils.save_models import write_graph
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 NET_NAME = 'dense_cnn'
 EPOCHS = 50
 
@@ -92,4 +92,4 @@ if __name__ == '__main__':
     model.save_frozen_graph()
     opt_graph = model.optimize_for_inference()
     
-    write_graph(graph, 'dense_cnn_opt.pb')
+    write_graph(opt_graph, 'dense_cnn_opt.pb')

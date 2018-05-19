@@ -82,6 +82,12 @@ def test_split_and_batch():
     for d in val_LD:
         assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
 
+    for d in train_LD:
+        assert d["keep_prob:0"] == 0.5
+
+    for d in val_LD:
+        assert d["keep_prob:0"] == 1.0
+
 
 def test_init_dict_split_max():
     x_train = np.arange(8 * 4200).reshape(-1, 2, 2, 2)
