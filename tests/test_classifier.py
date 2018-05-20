@@ -3,6 +3,7 @@
 import numpy as np
 import tensorflow as tf
 
+from math import isclose
 from cnn.model_class import TfClassifier, HALF_MAX_BATCH_SIZE
 
 
@@ -41,7 +42,7 @@ def test_split_and_batch():
     inputs = [x_train, t_train]
     input_names = ["features", "labels"]
     batch_size = 2
-    validation_split = 0.5
+    validation_split = 0.2
 
     model = fake_tfclassifier()
 
@@ -67,7 +68,7 @@ def test_split_and_batch():
     for d in val_LD:
         val_samples += d[input_tensors[0]].shape[0]
     val_samples
-
+   
     assert n_samples == train_samples + val_samples
 
     assert len(train_LD) * batch_size == train_samples
@@ -118,16 +119,28 @@ def test_init_dict_split_max():
         
 def test_split_data_dict_in_perc():
     model = fake_tfclassifier()
-    a = np.array([1,2,3,4])
+    a = np.arange(10)
+    a[0] = 3 #Trying a value != 0
+    perc_int = 0.72
    
-    dic = {8:a,9:a}
-    input_LD = model._split_data_dict_in_perc(dic,4,0.75)
-    #print(input_LD)
+    dic = {'a':a,'b':a}
+    input_LD = model._split_data_dict_in_perc(dic,len(a),np.array([perc_int]))
+    
+    first_dict = input_LD[0]
+    second_dict = input_LD[1]
+
+    assert len(a) == len(first_dict['a']) + len(second_dict['a'])
+
+    assert isclose(len(first_dict['b']), len(a) * perc_int, abs_tol=996e-3)
+
+    assert isclose(len(second_dict['a']), len(a) * (1 - perc_int), abs_tol=996e-3)
+
+    assert a[0] == first_dict['a'][0]
     
 if __name__ == '__main__':
-    #test_split_and_batch()
-    #test_init_dict_split_max()
+    test_split_and_batch()
+    test_init_dict_split_max()
     test_split_data_dict_in_perc()
-    print('OK!')
+    print('Test session completed')
 
     

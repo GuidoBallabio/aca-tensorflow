@@ -143,6 +143,7 @@ class TfClassifier:
 
     def _split_data_dict_in_perc(self, input_dict, n_samples, percs):
         for k, v in input_dict.items():
+            # Here n_sample == len(v)
             input_dict[k] = np.split(v, (n_samples * percs).astype(np.int))
 
         input_LD = [
@@ -153,6 +154,9 @@ class TfClassifier:
 
     def _batch_data_dict(self, input_dict, n_samples, batch_size):
         n_batches, drop = np.divmod(n_samples, batch_size)
+
+        if n_batches == 0:
+            n_batches = 1
 
         for k, v in input_dict.items():
             input_dict[k] = np.array_split(v, n_batches)
