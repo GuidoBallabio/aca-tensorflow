@@ -115,3 +115,19 @@ def test_init_dict_split_max():
 
     for d in input_LD:
         assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
+        
+def test_split_data_dict_in_perc():
+    model = fake_tfclassifier()
+    a = np.array([1,2,3,4])
+   
+    dic = {8:a,9:a}
+    input_LD = model._split_data_dict_in_perc(dic,4,0.75)
+    #print(input_LD)
+    
+if __name__ == '__main__':
+    #test_split_and_batch()
+    #test_init_dict_split_max()
+    test_split_data_dict_in_perc()
+    print('OK!')
+
+    
