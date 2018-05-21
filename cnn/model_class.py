@@ -65,7 +65,7 @@ class TfClassifier:
 
     def _infer(self, train_mode=False):
 
-        self.drop_prob_placeholder = tf.placeholder_with_default(1.0,
+        self.drop_prob_placeholder = tf.placeholder_with_default(0.0,
             (), name="drop_prob")
 
         logits = self.forward_pass_fn(train_mode, self.drop_prob_placeholder)

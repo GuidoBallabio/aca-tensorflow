@@ -88,7 +88,7 @@ def test_split_and_batch():
         assert d["drop_prob:0"] == 0.5
 
     for d in val_LD:
-        assert d["drop_prob:0"] == 1.0
+        assert d["drop_prob:0"] == 0.0
 
 
 def test_init_dict_split_max():
