@@ -12,7 +12,7 @@ NET_NAME = 'dense_cnn'
 EPOCHS = 50
 
 
-def forward_pass(train_mode, keep_prob_placeholder):
+def forward_pass(train_mode, drop_prob_placeholder):
     features = tf.placeholder(
         tf.float32, shape=(None, 32, 32, 3), name="features")
 
@@ -40,7 +40,7 @@ def forward_pass(train_mode, keep_prob_placeholder):
         inputs=pool2_flat, units=1024, activation=tf.nn.relu)
 
     dropout = tf.layers.dropout(
-        inputs=dense, rate=keep_prob_placeholder, training=train_mode)
+        inputs=dense, rate=drop_prob_placeholder, training=train_mode)
 
     return tf.layers.dense(inputs=dropout, units=10, name="logits")
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
         validation_split=0.2,
         epochs=EPOCHS,
         verbosity=1,
-        keep_prob=0.5)
+        drop_prob=0.5)
 
     print(history)
 

@@ -8,7 +8,7 @@ from cnn.model_class import TfClassifier, HALF_MAX_BATCH_SIZE
 
 
 def fake_tfclassifier():
-    def fp_fn(train_mode, keep_prob_placeholder):
+    def fp_fn(train_mode, drop_prob_placeholder):
         inputs = tf.placeholder(
             tf.float32, shape=[None, 2, 2, 2], name="features")
         flat = tf.layers.flatten(inputs)
@@ -85,10 +85,10 @@ def test_split_and_batch():
         assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
 
     for d in train_LD:
-        assert d["keep_prob:0"] == 0.5
+        assert d["drop_prob:0"] == 0.5
 
     for d in val_LD:
-        assert d["keep_prob:0"] == 1.0
+        assert d["drop_prob:0"] == 1.0
 
 
 def test_init_dict_split_max():
@@ -155,26 +155,26 @@ def test_batch_data_dict():
 
     assert isclose(n_elem_in_first_dict, batch_size, abs_tol=1)
 
-def test_set_keep_prob_to_LD():
+def test_set_drop_prob_to_LD():
     model = fake_tfclassifier()
     a = np.arange(2)
-    keep_prob = 0.4
+    drop_prob = 0.4
    
-    list_dicts = [{'a':a,'b':a},{'c':a,'keep_prob:0':0.3}]
-    output_LD = model._set_keep_prob_to_LD(list_dicts, keep_prob)
+    list_dicts = [{'a':a,'b':a},{'c':a,'drop_prob:0':0.3}]
+    output_LD = model._set_drop_prob_to_LD(list_dicts, drop_prob)
 
     assert len(output_LD) == len(list_dicts)
 
     assert len(output_LD[0].keys()) == len(list_dicts[0].keys()) 
 
-    assert output_LD[0]['keep_prob:0'] == keep_prob
+    assert output_LD[0]['drop_prob:0'] == drop_prob
 
-    assert output_LD[1]['keep_prob:0'] == keep_prob
+    assert output_LD[1]['drop_prob:0'] == drop_prob
 
 def test_init_dict():
     model = fake_tfclassifier()
     inputs = [1,1]
-    input_names = ['labels','keep_prob']
+    input_names = ['labels','drop_prob']
     with tf.Session(graph=model.train_ops_graph[1]) as s:
         tensors, output_LD = model._init_dict(inputs, input_names)
 
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     test_init_dict_split_max()
     test_split_data_dict_in_perc()
     test_batch_data_dict()
-    test_set_keep_prob_to_LD()
+    test_set_drop_prob_to_LD()
     test_init_dict()
     print('Test session completed')
 

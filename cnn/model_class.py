@@ -65,10 +65,10 @@ class TfClassifier:
 
     def _infer(self, train_mode=False):
 
-        self.keep_prob_placeholder = tf.placeholder_with_default(1.0,
-            (), name="keep_prob")
+        self.drop_prob_placeholder = tf.placeholder_with_default(1.0,
+            (), name="drop_prob")
 
-        logits = self.forward_pass_fn(train_mode, self.keep_prob_placeholder)
+        logits = self.forward_pass_fn(train_mode, self.drop_prob_placeholder)
 
         predictions = {
             "logits": logits,
@@ -136,10 +136,10 @@ class TfClassifier:
         '''
         Example:
             inputs = [1,1]
-            input_names = ['labels','keep_prob']
+            input_names = ['labels','drop_prob']
         Outputs: 
-            input_tensors = [<labels' tensor>, <keep_prob's tensor>]
-            input_DL = {<labels' tensor> : 1, <keep_prob's tensor> : 1}
+            input_tensors = [<labels' tensor>, <drop_prob's tensor>]
+            input_DL = {<labels' tensor> : 1, <drop_prob's tensor> : 1}
         '''
         input_tensors = [
             tf.get_default_graph().get_tensor_by_name(n + ':0')
@@ -190,18 +190,18 @@ class TfClassifier:
 
         return out_LD
 
-    def _set_keep_prob_to_LD(self, input_LD, keep_prob):
-        """Adder/Updater of the key 'keep_prob:0' in a list of dictionaries
+    def _set_drop_prob_to_LD(self, input_LD, drop_prob):
+        """Adder/Updater of the key 'drop_prob:0' in a list of dictionaries
 
          Args:
             input_LD(list of dict): list of dictionaries
-            keep_prob(float): keep probability
+            drop_prob(float): drop probability
 
          Returns:
-            The same list of dictionaries with a new(/updated) key 'keep_prob:0' with value keep_prob in each dictionary.
+            The same list of dictionaries with a new(/updated) key 'drop_prob:0' with value drop_prob in each dictionary.
 
         """
-        mode_d = {"keep_prob:0": keep_prob}
+        mode_d = {"drop_prob:0": drop_prob}
 
         for d in input_LD:
             d.update(mode_d)
@@ -225,21 +225,21 @@ class TfClassifier:
         return out_LD
 
     def _split_and_batch(self, inputs, input_names, batch_size,
-                         validation_split, keep_prob):
+                         validation_split, drop_prob):
         '''
         Example:
             inputs = [4200 features 2x2x2, 4200 labels]
             input_names = ['features','labels']
             batch_size = 2
             validation_split = 0.2
-            keep_prob = 0.5
+            drop_prob = 0.5
         Output: 
-            train_LD = [{<features' tensor> : 2 features 2x2x2, <labels' tensor> : 2 labels, <keep_prob's tensor> : 0.5},
-                        {<features' tensor> : 2 features 2x2x2, <labels' tensor> : 2 labels, <keep_prob's tensor> : 0.5},
+            train_LD = [{<features' tensor> : 2 features 2x2x2, <labels' tensor> : 2 labels, <drop_prob's tensor> : 0.5},
+                        {<features' tensor> : 2 features 2x2x2, <labels' tensor> : 2 labels, <drop_prob's tensor> : 0.5},
                         ... until features stored are 0.8 * 4200 times]
-            val_LD = [{<features' tensor> : 2000 features 2x2x2, <labels' tensor> : 2000 labels, <keep_prob's tensor> : 1},
+            val_LD = [{<features' tensor> : 2000 features 2x2x2, <labels' tensor> : 2000 labels, <drop_prob's tensor> : 1},
                       ... until features stored are 0.2 * 4200 times]
-            in this case val_LD = [{<features' tensor> : 840 features 2x2x2, <labels' tensor> : 840 labels, <keep_prob's tensor> : 1}]
+            in this case val_LD = [{<features' tensor> : 840 features 2x2x2, <labels' tensor> : 840 labels, <drop_prob's tensor> : 1}]
         '''
         n_samples = inputs[0].shape[0]
 
@@ -259,9 +259,9 @@ class TfClassifier:
         val_LD = self._batch_data_dict(val_dict, n_samples - n_train_samples,
                                        HALF_MAX_BATCH_SIZE)
 
-        if keep_prob is not None:
-            train_LD = self._set_keep_prob_to_LD(train_LD, keep_prob)
-            val_LD = self._set_keep_prob_to_LD(val_LD, 1.0)
+        if drop_prob is not None:
+            train_LD = self._set_drop_prob_to_LD(train_LD, drop_prob)
+            val_LD = self._set_drop_prob_to_LD(val_LD, 0.0)
 
         return train_LD, val_LD
 
@@ -272,7 +272,7 @@ class TfClassifier:
             validation_split=0,
             epochs=1,
             verbosity=0,
-            keep_prob=None):
+            drop_prob=None):
         """Train the model with given data and options.
 
         Args:
@@ -287,7 +287,7 @@ class TfClassifier:
             verbosity(int): If 0 will log only in the returned history. 
                 If 1 tensorboard summaries will be written. If 2 result of ops
                 will be printed for every batch (slow).
-            keep_prob(float): Eventual keep_prob for dropout
+            drop_prob(float): Eventual drop_prob for dropout
 
         Returns:
             The history of the training: Dictionary of the result of every of 
@@ -304,7 +304,7 @@ class TfClassifier:
             sess.run(tf.global_variables_initializer())
 
             train_LD, val_LD = self._split_and_batch(
-                inputs, input_names, batch_size, validation_split, keep_prob)
+                inputs, input_names, batch_size, validation_split, drop_prob)
 
             if verbosity >= 1:
                 summary_writer_train = tf.summary.FileWriter(
