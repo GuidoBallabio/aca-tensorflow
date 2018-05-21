@@ -133,6 +133,14 @@ class TfClassifier:
         return predictions, graph
 
     def _init_dict(self, inputs, input_names):
+        '''
+        Example:
+            inputs = [1,1]
+            input_names = ['labels','keep_prob']
+        Outputs: 
+            input_tensors = [<labels' tensor>, <keep_prob's tensor>]
+            input_DL = {<labels' tensor> : 1, <keep_prob's tensor> : 1}
+        '''
         input_tensors = [
             tf.get_default_graph().get_tensor_by_name(n + ':0')
             for n in input_names
@@ -142,6 +150,14 @@ class TfClassifier:
         return input_tensors, input_DL
 
     def _split_data_dict_in_perc(self, input_dict, n_samples, percs):
+        '''
+        Example:
+            input_dict = {'a':[1,2,3,4], 'b':[5,6,7,8]}
+            n_samples = 4
+            percs = np.array([0.75])
+        Output: [{'a':[1,2,3], 'b':[5,6,7]},
+                 {'a':[4], 'b':[8]}]
+        '''
         for k, v in input_dict.items():
             # Here n_sample == len(v)
             input_dict[k] = np.split(v, (n_samples * percs).astype(np.int))
@@ -153,6 +169,15 @@ class TfClassifier:
         return input_LD
 
     def _batch_data_dict(self, input_dict, n_samples, batch_size):
+        '''
+        Example:
+            input_dict = {'a':[1,2,3,4,5,6], 'b':[5,6,7,8,9,0]}
+            n_samples = 4
+            batch_size = 2
+        Output: [{'a':[1,2], 'b':[5,6]},
+                 {'a':[3,4], 'b':[7,8]},
+                 {'a':[5,6], 'b':[9,0]}]
+        '''
         n_batches, drop = np.divmod(n_samples, batch_size)
 
         if n_batches == 0:
@@ -166,6 +191,16 @@ class TfClassifier:
         return out_LD
 
     def _set_keep_prob_to_LD(self, input_LD, keep_prob):
+        """Adder/Updater of the key 'keep_prob:0' in a list of dictionaries
+
+         Args:
+            input_LD(list of dict): list of dictionaries
+            keep_prob(float): keep probability
+
+         Returns:
+            The same list of dictionaries with a new(/updated) key 'keep_prob:0' with value keep_prob in each dictionary.
+
+        """
         mode_d = {"keep_prob:0": keep_prob}
 
         for d in input_LD:
@@ -174,6 +209,13 @@ class TfClassifier:
         return input_LD
 
     def _init_dict_split_max(self, inputs, input_names):
+        '''
+        Example:
+            inputs = [4200 features 2x2x2, 4200 labels]
+            input_names = ['features','labels']
+        Output: [{<features' tensor> : 2200 features 2x2x2, <labels' tensor> : 2200 labels 2x2x2},
+                 {<features' tensor> : 2000 features 2x2x2, <labels' tensor> : 2000 labels 2x2x2}]
+        '''
         input_dict = self._init_dict(inputs, input_names)[1]
         n_samples = inputs[0].shape[0]
 
@@ -184,7 +226,21 @@ class TfClassifier:
 
     def _split_and_batch(self, inputs, input_names, batch_size,
                          validation_split, keep_prob):
-
+        '''
+        Example:
+            inputs = [4200 features 2x2x2, 4200 labels]
+            input_names = ['features','labels']
+            batch_size = 2
+            validation_split = 0.2
+            keep_prob = 0.5
+        Output: 
+            train_LD = [{<features' tensor> : 2 features 2x2x2, <labels' tensor> : 2 labels, <keep_prob's tensor> : 0.5},
+                        {<features' tensor> : 2 features 2x2x2, <labels' tensor> : 2 labels, <keep_prob's tensor> : 0.5},
+                        ... until features stored are 0.8 * 4200 times]
+            val_LD = [{<features' tensor> : 2000 features 2x2x2, <labels' tensor> : 2000 labels, <keep_prob's tensor> : 1},
+                      ... until features stored are 0.2 * 4200 times]
+            in this case val_LD = [{<features' tensor> : 840 features 2x2x2, <labels' tensor> : 840 labels, <keep_prob's tensor> : 1}]
+        '''
         n_samples = inputs[0].shape[0]
 
         input_tensors, input_DL = self._init_dict(inputs, input_names)
@@ -217,7 +273,7 @@ class TfClassifier:
             epochs=1,
             verbosity=0,
             keep_prob=None):
-        """Train the model with given data and optiions.
+        """Train the model with given data and options.
 
         Args:
             inputs(list of np.ndarray): Data as list of arrays, one of which
