@@ -117,6 +117,7 @@ def test_init_dict_split_max():
 
     for d in input_LD:
         assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
+
         
 def test_split_data_dict_in_perc():
     model = fake_tfclassifier()
@@ -139,6 +140,7 @@ def test_split_data_dict_in_perc():
 
     assert a[0] == first_dict['a'][0]
 
+
 def test_batch_data_dict():
     model = fake_tfclassifier()
     a = np.arange(10)
@@ -154,6 +156,7 @@ def test_batch_data_dict():
     assert len(output_LD) == n_of_dicts
 
     assert isclose(n_elem_in_first_dict, batch_size, abs_tol=1)
+
 
 def test_set_drop_prob_to_LD():
     model = fake_tfclassifier()
@@ -171,6 +174,7 @@ def test_set_drop_prob_to_LD():
 
     assert output_LD[1]['drop_prob:0'] == drop_prob
 
+
 def test_init_dict():
     model = fake_tfclassifier()
     inputs = [1,1]
@@ -181,13 +185,3 @@ def test_init_dict():
     for t in tensors:
         assert output_LD[t] == 1
 
-if __name__ == '__main__':
-    test_split_and_batch()
-    test_init_dict_split_max()
-    test_split_data_dict_in_perc()
-    test_batch_data_dict()
-    test_set_drop_prob_to_LD()
-    test_init_dict()
-    print('Test session completed')
-
-    
