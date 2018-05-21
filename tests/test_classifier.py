@@ -3,7 +3,6 @@
 import numpy as np
 import tensorflow as tf
 
-from math import isclose
 from cnn.model_class import TfClassifier, HALF_MAX_BATCH_SIZE
 
 
@@ -49,7 +48,7 @@ def test_split_and_batch():
     with tf.Session(graph=model.train_ops_graph[1]) as s:
         split = model._split_and_batch(inputs, input_names, batch_size,
                                        validation_split, 0.5)
-        
+
         input_tensors = [
             tf.get_default_graph().get_tensor_by_name(n + ':0')
             for n in input_names
@@ -69,7 +68,7 @@ def test_split_and_batch():
     for d in val_LD:
         val_samples += d[input_tensors[0]].shape[0]
     val_samples
-   
+
     assert n_samples == train_samples + val_samples
 
     assert len(train_LD) * batch_size == train_samples
@@ -118,27 +117,24 @@ def test_init_dict_split_max():
     for d in input_LD:
         assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
 
-        
+
 def test_split_data_dict_in_perc():
     model = fake_tfclassifier()
-    a = np.arange(10)
-    a[0] = 3 #Trying a value != 0
+    a = np.arange(1, 11)
     n_samples = len(a)
-    perc_int = 0.72
-   
-    dic = {'a':a,'b':a}
-    output_LD = model._split_data_dict_in_perc(dic, n_samples, np.array([perc_int]))
-    
-    first_dict = output_LD[0]
-    second_dict = output_LD[1]
+    percs = np.array([0.72, 0.84])
 
-    assert len(a) == len(first_dict['a']) + len(second_dict['a'])
+    dic = {'a': a, 'b': a}
+    output_LD = model._split_data_dict_in_perc(dic, n_samples, percs)
 
-    assert isclose(len(first_dict['b']), len(a) * perc_int, abs_tol=996e-3)
+    lens = np.array([x['a'].shape[0] for x in output_LD])
+    splits_index = (n_samples * np.append(percs, 1.0)).astype(np.int)
 
-    assert isclose(len(second_dict['a']), len(a) * (1 - perc_int), abs_tol=996e-3)
+    assert n_samples == lens.sum()
 
-    assert a[0] == first_dict['a'][0]
+    assert np.all(lens.cumsum() == splits_index)
+
+    assert a[0] == output_LD[0]['a'][0]
 
 
 def test_batch_data_dict():
@@ -146,29 +142,29 @@ def test_batch_data_dict():
     a = np.arange(10)
     n_samples = len(a)
     batch_size = 2
-   
-    dic = {'a':a,'b':a}
+
+    dic = {'a': a, 'b': a}
     output_LD = model._batch_data_dict(dic, n_samples, batch_size)
 
     n_of_dicts = np.int(len(a) / batch_size)
     n_elem_in_first_dict = len(output_LD[0]['a'])
- 
+
     assert len(output_LD) == n_of_dicts
 
-    assert isclose(n_elem_in_first_dict, batch_size, abs_tol=1)
+    assert np.isclose(n_elem_in_first_dict, batch_size, atol=1)
 
 
 def test_set_drop_prob_to_LD():
     model = fake_tfclassifier()
     a = np.arange(2)
     drop_prob = 0.4
-   
-    list_dicts = [{'a':a,'b':a},{'c':a,'drop_prob:0':0.3}]
+
+    list_dicts = [{'a': a, 'b': a}, {'c': a, 'drop_prob:0': 0.3}]
     output_LD = model._set_drop_prob_to_LD(list_dicts, drop_prob)
 
     assert len(output_LD) == len(list_dicts)
 
-    assert len(output_LD[0].keys()) == len(list_dicts[0].keys()) 
+    assert len(output_LD[0].keys()) == len(list_dicts[0].keys())
 
     assert output_LD[0]['drop_prob:0'] == drop_prob
 
@@ -177,11 +173,10 @@ def test_set_drop_prob_to_LD():
 
 def test_init_dict():
     model = fake_tfclassifier()
-    inputs = [1,1]
-    input_names = ['labels','drop_prob']
+    inputs = [1, 1]
+    input_names = ['labels', 'drop_prob']
     with tf.Session(graph=model.train_ops_graph[1]) as s:
         tensors, output_LD = model._init_dict(inputs, input_names)
 
     for t in tensors:
         assert output_LD[t] == 1
-
