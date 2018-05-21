@@ -65,8 +65,8 @@ class TfClassifier:
 
     def _infer(self, train_mode=False):
 
-        self.drop_prob_placeholder = tf.placeholder_with_default(
-            0.0, (), name="drop_prob")
+        self.drop_prob_placeholder = tf.placeholder(
+            tf.float32, (), name="drop_prob")
 
         logits = self.forward_pass_fn(train_mode, self.drop_prob_placeholder)
 
@@ -252,9 +252,8 @@ class TfClassifier:
 
         input_tensors, input_DL = self._init_dict(inputs, input_names)
 
-        input_LD = self._split_data_dict_in_perc(input_DL, n_samples,
-                                                 np.array(
-                                                     [1 - validation_split]))
+        input_LD = self._split_data_dict_in_perc(
+            input_DL, n_samples, np.array([1 - validation_split]))
 
         train_dict = input_LD[0]
         val_dict = input_LD[1]
@@ -323,10 +322,10 @@ class TfClassifier:
                 run_metadata = tf.RunMetadata()
                 run_options = tf.RunOptions(
                     trace_level=tf.RunOptions.FULL_TRACE)
-                print(
-                    "For training: tensorboard --logdir=" + self.tb_path_train)
-                print(
-                    "For validation: tensorboard --logdir=" + self.tb_path_val)
+                print("For training: tensorboard --logdir=" +
+                      self.tb_path_train)
+                print("For validation: tensorboard --logdir=" +
+                      self.tb_path_val)
                 i = 1
             else:
                 run_metadata = None
