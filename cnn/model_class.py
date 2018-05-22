@@ -228,10 +228,11 @@ class TfClassifier:
                 sess.run(tf.local_variables_initializer())
 
                 for train_dict in train_LD:
-                    if i % 20 == 0:
-                        run_metadata = tf.RunMetadata()
-                        run_options = tf.RunOptions(
-                            trace_level=tf.RunOptions.FULL_TRACE)
+                    if verbosity >= 1:
+                        if i % 20 == 0:
+                            run_metadata = tf.RunMetadata()
+                            run_options = tf.RunOptions(
+                                trace_level=tf.RunOptions.FULL_TRACE)
 
                     out = sess.run(
                         ops,
