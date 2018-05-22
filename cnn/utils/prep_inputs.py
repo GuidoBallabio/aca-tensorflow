@@ -1,7 +1,7 @@
 """General function for formatting inputs"""
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 HALF_MAX_BATCH_SIZE = 2000
 

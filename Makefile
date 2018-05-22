@@ -7,11 +7,9 @@ init:
 dense:
 	python -m cnn.dense
 
-conv:
-
-
-complex:
-
+beautify:
+	yapf -i --recursive .
+	isort -ac --recursive .
 
 test:
 	python -m pytest

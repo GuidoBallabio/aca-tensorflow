@@ -6,8 +6,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
 
-from cnn.utils.save_models import MODELS_DIR, load_frozen_graph, write_graph, transform_graph
 from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
+from cnn.utils.save_models import (MODELS_DIR, load_frozen_graph,
+                                   transform_graph, write_graph)
 
 
 class TfClassifier:
@@ -95,6 +96,8 @@ class TfClassifier:
         with graph.as_default() as g:
             predictions = self._infer(train_mode=True)
             loss = self._calculate_loss(predictions["logits"])
+            if self.fake_quantization:
+                tf.contrib.quantize.create_training_graph(quant_delay=2000)
             train_op = self._optimize(loss)
             evals = self._evaluate_op(predictions)
             summaries = tf.summary.merge_all()
@@ -114,6 +117,8 @@ class TfClassifier:
             predictions = self._infer()
             loss = self._calculate_loss(predictions["logits"])
             evals = self._evaluate_op(predictions)
+            if self.fake_quantization:
+                tf.contrib.quantize.create_eval_graph()
             summaries = tf.summary.merge_all()
 
         ops = predictions
@@ -128,6 +133,8 @@ class TfClassifier:
 
         with graph.as_default() as g:
             predictions = self._infer()
+            if self.fake_quantization:
+                tf.contrib.quantize.create_eval_graph()
 
         return predictions, graph
 
@@ -420,7 +427,8 @@ class TfClassifier:
 
         if self.fake_quantization:
             transforms = ["add_default_attributes"] + transforms[:-1] + [
-                "quantize_weights", "quantize_nodes", "sort_by_execution_order"
+                "quantize_weights", "quantize_nodes", "strip_unused_nodes",
+                "sort_by_execution_order"
             ]
 
         for transf in add_transf:

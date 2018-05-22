@@ -9,6 +9,8 @@ from tensorflow import keras
 from tensorflow.python.framework import graph_util
 from tensorflow.tools.graph_transforms import TransformGraph
 
+from cnn.utils.prep_inputs import init_dict_split_max
+
 MODELS_DIR = Path(__file__).parent.parent / 'models'
 
 

@@ -4,7 +4,8 @@ import numpy as np
 import tensorflow as tf
 
 from cnn.model_class import TfClassifier
-from cnn.utils.prep_inputs import init_dict, split_data_dict_in_perc, batch_data_dict, HALF_MAX_BATCH_SIZE
+from cnn.utils.prep_inputs import (HALF_MAX_BATCH_SIZE, batch_data_dict,
+                                   init_dict, split_data_dict_in_perc)
 
 
 def fake_tfclassifier():
