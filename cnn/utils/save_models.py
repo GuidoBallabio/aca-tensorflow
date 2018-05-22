@@ -25,8 +25,8 @@ def transform_graph(graph_def, input_names, output_names, transforms):
     return out_graph
 
 
-def write_graph(graph, name, dir_path=MODELS_DIR.as_posix()):
-    tf.train.write_graph(graph.as_graph_def(), dir_path, name, as_text=False)
+def write_graph(graph_def, name, dir_path=MODELS_DIR.as_posix()):
+    tf.train.write_graph(graph_def, dir_path, name, as_text=False)
 
 
 def load_frozen_graph(frozen_graph_filename):
