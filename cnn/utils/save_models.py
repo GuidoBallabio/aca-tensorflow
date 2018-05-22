@@ -13,8 +13,8 @@ MODELS_DIR = Path(__file__).parent.parent / 'models'
 
 
 def transform_graph(graph_def, input_names, output_names, transforms):
-    out_graph_def = TransformGraph(graph_def, input_names,
-                                   output_names, transforms)
+    out_graph_def = TransformGraph(graph_def, input_names, output_names,
+                                   transforms)
 
     out_graph = tf.Graph()
     with out_graph.as_default():
@@ -42,6 +42,18 @@ def load_frozen_graph(frozen_graph_filename):
         tf.import_graph_def(graph_def, name='')
 
     return graph
+
+
+def predict_from_frozen(graph, inputs, input_names, output_names):
+
+    input_LD = init_dict_split_max(inputs, input_names)
+
+    with tf.Session(graph=graph) as sess:
+        out = []
+        for input_dict in input_LD:
+            out.append(sess.run(ops, feed_dict=input_dict))
+
+    return out
 
 
 def model_to_estimator(model):

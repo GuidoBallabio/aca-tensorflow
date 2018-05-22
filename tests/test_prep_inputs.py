@@ -3,7 +3,8 @@
 import numpy as np
 import tensorflow as tf
 
-from cnn.model_class import TfClassifier, HALF_MAX_BATCH_SIZE
+from cnn.model_class import TfClassifier
+from cnn.utils.prep_inputs import init_dict, split_data_dict_in_perc, batch_data_dict, HALF_MAX_BATCH_SIZE
 
 
 def fake_tfclassifier():
@@ -45,14 +46,10 @@ def test_split_and_batch():
 
     model = fake_tfclassifier()
 
-    with tf.Session(graph=model.train_ops_graph[1]) as s:
-        split = model._split_and_batch(inputs, input_names, batch_size,
-                                       validation_split, 0.5)
+    split = model._split_and_batch(inputs, input_names, batch_size,
+                                   validation_split, 0.5)
 
-        input_tensors = [
-            tf.get_default_graph().get_tensor_by_name(n + ':0')
-            for n in input_names
-        ]
+    input_names = [n + ':0' for n in input_names]
 
     assert len(split) == 2
 
@@ -61,12 +58,12 @@ def test_split_and_batch():
 
     train_samples = 0
     for d in train_LD:
-        train_samples += d[input_tensors[0]].shape[0]
+        train_samples += d[input_names[0]].shape[0]
     train_samples
 
     val_samples = 0
     for d in val_LD:
-        val_samples += d[input_tensors[0]].shape[0]
+        val_samples += d[input_names[0]].shape[0]
     val_samples
 
     assert n_samples == train_samples + val_samples
@@ -78,10 +75,10 @@ def test_split_and_batch():
     assert val_samples == np.int(n_samples * validation_split)
 
     for d in train_LD:
-        assert batch_size == d[input_tensors[0]].shape[0]
+        assert batch_size == d[input_names[0]].shape[0]
 
     for d in val_LD:
-        assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
+        assert HALF_MAX_BATCH_SIZE * 2 >= d[input_names[0]].shape[0]
 
     for d in train_LD:
         assert d["drop_prob:0"] == 0.5
@@ -100,32 +97,27 @@ def test_init_dict_split_max():
 
     model = fake_tfclassifier()
 
-    with tf.Session(graph=model.train_ops_graph[1]) as s:
-        input_LD = model._init_dict_split_max(inputs, input_names)
-        input_tensors = [
-            tf.get_default_graph().get_tensor_by_name(n + ':0')
-            for n in input_names
-        ]
+    input_LD = model._init_dict_split_max(inputs, input_names)
+    input_names = [n + ':0' for n in input_names]
 
     out_samples = 0
     for d in input_LD:
-        out_samples += d[input_tensors[0]].shape[0]
+        out_samples += d[input_names[0]].shape[0]
     out_samples
 
     assert n_samples == out_samples
 
     for d in input_LD:
-        assert HALF_MAX_BATCH_SIZE * 2 >= d[input_tensors[0]].shape[0]
+        assert HALF_MAX_BATCH_SIZE * 2 >= d[input_names[0]].shape[0]
 
 
 def test_split_data_dict_in_perc():
-    model = fake_tfclassifier()
     a = np.arange(1, 11)
     n_samples = len(a)
     percs = np.array([0.72, 0.84])
 
     dic = {'a': a, 'b': a}
-    output_LD = model._split_data_dict_in_perc(dic, n_samples, percs)
+    output_LD = split_data_dict_in_perc(dic, n_samples, percs)
 
     lens = np.array([x['a'].shape[0] for x in output_LD])
     splits_index = (n_samples * np.append(percs, 1.0)).astype(np.int)
@@ -138,13 +130,12 @@ def test_split_data_dict_in_perc():
 
 
 def test_batch_data_dict():
-    model = fake_tfclassifier()
     a = np.arange(10)
     n_samples = len(a)
     batch_size = 2
 
     dic = {'a': a, 'b': a}
-    output_LD = model._batch_data_dict(dic, n_samples, batch_size)
+    output_LD = batch_data_dict(dic, n_samples, batch_size)
 
     n_of_dicts = np.int(len(a) / batch_size)
     n_elem_in_first_dict = len(output_LD[0]['a'])
@@ -172,11 +163,10 @@ def test_set_drop_prob_to_LD():
 
 
 def test_init_dict():
-    model = fake_tfclassifier()
     inputs = [1, 1]
     input_names = ['labels', 'drop_prob']
-    with tf.Session(graph=model.train_ops_graph[1]) as s:
-        tensors, output_LD = model._init_dict(inputs, input_names)
 
-    for t in tensors:
-        assert output_LD[t] == 1
+    input_names, output_LD = init_dict(inputs, input_names)
+
+    for n in input_names:
+        assert output_LD[n] == 1
