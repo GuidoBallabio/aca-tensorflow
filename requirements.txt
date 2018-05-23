@@ -1,6 +1,7 @@
 tensorflow
 perf
 pytest
+numpy
 scipy
 sklearn
 h5py
