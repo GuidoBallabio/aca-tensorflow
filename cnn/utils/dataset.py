@@ -6,8 +6,9 @@ from urllib.request import urlretrieve
 import h5py
 import numpy as np
 import tensorflow as tf
-from sklearn.utils import shuffle
 from tensorflow import keras
+
+from sklearn.utils import shuffle
 
 DATA_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
 DATA_DIR = Path(__file__).parent.parent / 'data'

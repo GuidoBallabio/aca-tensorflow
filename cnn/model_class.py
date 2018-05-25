@@ -4,11 +4,10 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.framework import graph_util
 
+from cnn.utils.graph_manipulation import (MODELS_DIR, load_frozen_graph,
+                                          transform_graph, write_graph)
 from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
-from cnn.utils.save_models import (MODELS_DIR, load_frozen_graph,
-                                   transform_graph, write_graph)
 
 
 class TfClassifier:
@@ -222,10 +221,10 @@ class TfClassifier:
                 run_metadata = tf.RunMetadata()
                 run_options = tf.RunOptions(
                     trace_level=tf.RunOptions.FULL_TRACE)
-                print(
-                    "For training: tensorboard --logdir=" + self.tb_path_train)
-                print(
-                    "For validation: tensorboard --logdir=" + self.tb_path_val)
+                print("For training: tensorboard --logdir=" +
+                      self.tb_path_train)
+                print("For validation: tensorboard --logdir=" +
+                      self.tb_path_val)
                 i = 1
             else:
                 run_metadata = None
@@ -364,7 +363,6 @@ class TfClassifier:
 
     def load_model(self):
         """Load previously frozen model as graph with input and output names.
-
         
         Returns:
             The graph of the frozel model as well as input and output names for
@@ -376,38 +374,34 @@ class TfClassifier:
         return load_frozen_graph(
             (MODELS_DIR / self.name / 'model.pb').as_posix())
 
-    def _freeze_graph(self, graph=None, output_names=['softmax']):
+    def freeze(self, output_names=['softmax']):
         if graph is None:
             graph = self.predict_ops_graph[1]
 
-        with tf.Session(graph=graph) as sess:
-            saver = tf.train.Saver()
-            sess.run(tf.global_variables_initializer())
-            saver.restore(sess, self.save_path.as_posix())
-
-            constant_graph_def = graph_util.convert_variables_to_constants(
-                sess, sess.graph.as_graph_def(), output_names)
-
-        return constant_graph_def
+        return freeze_graph(graph, output_names)
 
     def save_frozen_graph(self):
         """Freeze the prediction graph with last saved data and write it to disk.
 
-        Args:
-            graph: Graph to freeze, defaults to self.predict_graph
-            output_names: List of strings. Names of output op
+        The file will be written to the model dir as "self.name + '.pb'",
+        in ProtoBuff format.
+        """
+        write_graph(self.freeze(), self.name + '.pb',
+                    self.save_path.parent.as_posix())
+
+    def save_optimazed_graph(self):
+        """Optimize the prediction graph with last saved data and write it to disk.
 
         The file will be written to the model dir as "self.name + '.pb'",
         in ProtoBuff format.
         """
-        write_graph(self._freeze_graph(), 'model.pb',
+        write_graph(self.optimize(), self.name + '_opt.pb',
                     self.save_path.parent.as_posix())
 
-    def optimize_for_inference(self,
-                               add_transf=[],
-                               input_names=['features'],
-                               output_names=['softmax'],
-                               graph_def=None):
+    def optimize(self,
+                 add_transf=[],
+                 input_names=['features'],
+                 output_names=['softmax']):
         """Optimize the model graph for inference, quantize if constructed for it.
 
         Args:
@@ -418,25 +412,7 @@ class TfClassifier:
             The transformed optimized graph. If quantization was enabled at
             construction time then it will be finalized (from fake to real).
         """
-        transforms = [
-            "strip_unused_nodes(type=float)",
-            "remove_nodes(op=Identity, op=CheckNumerics)",
-            "fold_constants(ignore_errors=true)", "fold_batch_norms",
-            "fold_old_batch_norms", "sort_by_execution_order"
-        ]
 
-        if self.fake_quantization:
-            transforms = ["add_default_attributes"] + transforms[:-1] + [
-                "quantize_weights", "quantize_nodes", "strip_unused_nodes",
-                "sort_by_execution_order"
-            ]
-
-        for transf in add_transf:
-            if transf not in transforms:
-                transforms.append(transf)
-
-        if graph_def is None:
-            graph_def = self._freeze_graph()
-
-        return transform_graph(graph_def, input_names, output_names,
-                               transforms)
+        return optimize_for_inference(self.freeze_graph(), input_names,
+                                      output_names, self.fake_quantization,
+                                      add_transf)
