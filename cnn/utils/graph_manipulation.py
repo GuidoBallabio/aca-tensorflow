@@ -54,6 +54,12 @@ def load_frozen_graph(frozen_graph_path):
     return graph
 
 
+def just_run_graph(graph, input_LD, output_names):
+    with tf.Session(graph=graph) as sess:
+        for input_dict in input_LD:
+            sess.run(output_names, feed_dict=input_dict)
+
+
 def predict_from_frozen(graph, inputs, input_names, output_names):
 
     input_LD = init_dict_split_max(inputs, input_names)
@@ -61,7 +67,7 @@ def predict_from_frozen(graph, inputs, input_names, output_names):
     with tf.Session(graph=graph) as sess:
         out = []
         for input_dict in input_LD:
-            out.append(sess.run(ops, feed_dict=input_dict))
+            out.append(sess.run(output_names, feed_dict=input_dict))
 
     return out
 

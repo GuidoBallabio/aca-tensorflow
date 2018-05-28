@@ -1,11 +1,28 @@
-all: init benchmarks
+nets = dense
+net_names = $(addsuffix _cnn, ${nets})
+opt_nets = $(addsuffix _opt, ${net_names})
+
+py_files = $(addprefix cnn/, $(addsuffix .py, $(nets)))
+trainings = $(addprefix models/, $(addsuffix .pb, $(opt_nets)))
+benchmarks = $(addprefix results/, $(addsuffix .json, $(opt_nets)))
+
+BENCH_OPT = "--verbose" # --rigorous -l LOOPS/--loops=LOOPS -w WARMUPS/--warmups=WARMUPS
+						# --min-time=MIN_TIME
+TRAIN_OPT = "-v"
+
+$(benchmarks): results/%.json: models/%.pb
+	python run_bench.py $(basename $(notdir $<)) -o "$@" $(BENCH_OPT)
+
+$(trainings): models/%_cnn_opt.pb: cnn/%.py
+	python -m cnn.$(basename $(notdir $<)) "$(basename $(notdir $<))_cnn" $(TRAIN_OPT)
+
+$(py_files): ;
+
+all: clean init train benchmark
 
 init:
 	pip install -U -r requirements.txt
 	python -m cnn.utils.dataset
-
-dense:
-	python -m cnn.dense
 
 beautify:
 	yapf -i --recursive .
@@ -14,12 +31,14 @@ beautify:
 test:
 	python -m pytest
 
-benchmark:
-	jupyter notebook Benchmarks.ipynb
+train: $(trainings)
+
+benchmark: $(benchmarks)
 
 clean:
 	rm cnn/data/*
 	rm cnn/models/*
 	rm /tmp/log-tb/*
+	rm results/*
 
-.PHONY: init dense benchmarks clean
+.PHONY: all init beautify test clean

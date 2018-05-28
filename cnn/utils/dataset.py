@@ -6,9 +6,8 @@ from urllib.request import urlretrieve
 import h5py
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
-
 from sklearn.utils import shuffle
+from tensorflow import keras
 
 DATA_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
 DATA_DIR = Path(__file__).parent.parent / 'data'
@@ -114,12 +113,7 @@ def load_cifar10():
 
 
 def dataset_preprocessing_by_keras(x_train):
-    """Load and Preprocess online the dataset, by Keras.s
-
-    To use with:
-        # fits the model on batches with real-time data augmentation:
-        model.fit_generator(datagen.flow(x_train, y_train, batch_size=32),
-                            steps_per_epoch=len(x_train) / 32, epochs=epochs)
+    """Dataset with preprocessing by Keras.
     """
 
     datagen = keras.preprocessing.image.ImageDataGenerator(

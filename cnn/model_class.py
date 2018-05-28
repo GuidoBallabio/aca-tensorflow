@@ -23,7 +23,7 @@ class TfClassifier:
                  loss_fn,
                  eval_fn,
                  optimizer,
-                 fake_quantization=False):
+                 quantization=False):
         """Initializer of TfClassifier.
 
          Args:
@@ -52,7 +52,7 @@ class TfClassifier:
         self.loss_fn = loss_fn
         self.eval_fn = eval_fn
         self.optimizer = optimizer
-        self.fake_quantization = fake_quantization
+        self.quantization = quantization
         self.train_ops_graph = self.train_graph()
         self.eval_ops_graph = self.evaluate_graph()
         self.predict_ops_graph = self.predict_graph()
@@ -95,7 +95,7 @@ class TfClassifier:
         with graph.as_default() as g:
             predictions = self._infer(train_mode=True)
             loss = self._calculate_loss(predictions["logits"])
-            if self.fake_quantization:
+            if self.quantization:
                 tf.contrib.quantize.create_training_graph(quant_delay=2000)
             train_op = self._optimize(loss)
             evals = self._evaluate_op(predictions)
@@ -116,7 +116,7 @@ class TfClassifier:
             predictions = self._infer()
             loss = self._calculate_loss(predictions["logits"])
             evals = self._evaluate_op(predictions)
-            if self.fake_quantization:
+            if self.quantization:
                 tf.contrib.quantize.create_eval_graph()
             summaries = tf.summary.merge_all()
 
@@ -132,7 +132,7 @@ class TfClassifier:
 
         with graph.as_default() as g:
             predictions = self._infer()
-            if self.fake_quantization:
+            if self.quantization:
                 tf.contrib.quantize.create_eval_graph()
 
         return predictions, graph
@@ -221,10 +221,10 @@ class TfClassifier:
                 run_metadata = tf.RunMetadata()
                 run_options = tf.RunOptions(
                     trace_level=tf.RunOptions.FULL_TRACE)
-                print("For training: tensorboard --logdir=" +
-                      self.tb_path_train)
-                print("For validation: tensorboard --logdir=" +
-                      self.tb_path_val)
+                print(
+                    "For training: tensorboard --logdir=" + self.tb_path_train)
+                print(
+                    "For validation: tensorboard --logdir=" + self.tb_path_val)
                 i = 1
             else:
                 run_metadata = None
@@ -414,5 +414,5 @@ class TfClassifier:
         """
 
         return optimize_for_inference(self.freeze_graph(), input_names,
-                                      output_names, self.fake_quantization,
+                                      output_names, self.quantization,
                                       add_transf)

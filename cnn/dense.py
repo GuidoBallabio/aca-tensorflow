@@ -3,13 +3,9 @@
 import numpy as np
 import tensorflow as tf
 
-from cnn.model_class import TfClassifier
-from cnn.utils.dataset import dataset_preprocessing_by_keras, load_cifar10
-from cnn.utils.graph_manipulation import write_graph
+from cnn.fit_classifier import FitOnCIFAR10
 
-BATCH_SIZE = 32
 NET_NAME = 'dense_cnn'
-EPOCHS = 50
 
 
 def forward_pass(train_mode, drop_prob_placeholder):
@@ -67,27 +63,6 @@ def eval_fn(predictions):
 
     return eval_metrics
 
-
 if __name__ == '__main__':
-    x_train, t_train, x_test, t_test = load_cifar10()
-
-    x_train = dataset_preprocessing_by_keras(x_train)
-
-    model = TfClassifier(NET_NAME, forward_pass, loss_fn, eval_fn,
-                         tf.train.AdamOptimizer())
-    history = model.fit(
-        [x_train, t_train],
-        batch_size=BATCH_SIZE,
-        validation_split=0.2,
-        epochs=EPOCHS,
-        verbosity=1,
-        drop_prob=0.5)
-
-    print(history)
-
-    evals = model.evaluate([x_test, t_test])
-
-    print(evals)
-
-    model.save_frozen_graph()
-    models.save_optimazed_graph()
+    fitter = FitOnCIFAR10(forward_pass, loss_fn, eval_fn)
+    fitter.main()
