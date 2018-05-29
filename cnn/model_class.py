@@ -6,7 +6,8 @@ import numpy as np
 import tensorflow as tf
 
 from cnn.utils.graph_manipulation import (MODELS_DIR, load_frozen_graph,
-                                          transform_graph, write_graph)
+                                          transform_graph, write_graph,
+                                          freeze_graph, optimize_for_inference)
 from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
 
 
@@ -375,10 +376,10 @@ class TfClassifier:
             (MODELS_DIR / self.name / 'model.pb').as_posix())
 
     def freeze(self, output_names=['softmax']):
-        if graph is None:
-            graph = self.predict_ops_graph[1]
+        #if graph is None:
+        graph = self.predict_ops_graph[1]
 
-        return freeze_graph(graph, output_names)
+        return freeze_graph(graph, output_names, self.save_path.as_posix())
 
     def save_frozen_graph(self):
         """Freeze the prediction graph with last saved data and write it to disk.
@@ -413,6 +414,6 @@ class TfClassifier:
             construction time then it will be finalized (from fake to real).
         """
 
-        return optimize_for_inference(self.freeze_graph(), input_names,
+        return optimize_for_inference(self.freeze(), input_names,
                                       output_names, self.quantization,
                                       add_transf)
