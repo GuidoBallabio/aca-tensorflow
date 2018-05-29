@@ -1,20 +1,26 @@
 nets = dense
-net_names = $(addsuffix _cnn, ${nets})
-opt_nets = $(addsuffix _opt, ${net_names})
+opt_nets = $(addsuffix _opt, ${nets})
+quant_nets = $(addsuffix _quant, ${nets})
+all_nets = $(opt_nets) $(quant_nets)
 
 py_files = $(addprefix cnn/, $(addsuffix .py, $(nets)))
-trainings = $(addprefix models/, $(addsuffix .pb, $(opt_nets)))
-benchmarks = $(addprefix results/, $(addsuffix .json, $(opt_nets)))
+train_opt = $(addprefix models/, $(addsuffix .pb, $(opt_nets)))
+train_quant = $(addprefix models/, $(addsuffix .pb, $(quant_nets)))
+benchmarks = $(addprefix results/, $(addsuffix .json, $(all_nets)))
 
 BENCH_OPT = "--verbose" # --rigorous -l LOOPS/--loops=LOOPS -w WARMUPS/--warmups=WARMUPS
 						# --min-time=MIN_TIME
 TRAIN_OPT = "-v"
+QUANTIZE = "--quantization"
 
 $(benchmarks): results/%.json: models/%.pb
 	python run_bench.py $(basename $(notdir $<)) -o "$@" $(BENCH_OPT)
 
-$(trainings): models/%_cnn_opt.pb: cnn/%.py
-	python -m cnn.$(basename $(notdir $<)) "$(basename $(notdir $<))_cnn" $(TRAIN_OPT)
+$(train_opt): models/%_opt.pb: cnn/%.py
+	python -m cnn.$(basename $(notdir $<)) "$(basename $(notdir $@))" $(TRAIN_OPT)
+
+$(train_quant): models/%_quant.pb: cnn/%.py
+	python -m cnn.$(basename $(notdir $<)) "$(basename $(notdir $@))" $(QUANTIZE) $(TRAIN_OPT)
 
 $(py_files): ;
 
@@ -31,7 +37,7 @@ beautify:
 test:
 	python -m pytest
 
-train: $(trainings)
+train: $(train_opt) $(train_quant)
 
 benchmark: $(benchmarks)
 

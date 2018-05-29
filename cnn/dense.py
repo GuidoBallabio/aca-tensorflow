@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from cnn.fit_classifier import FitOnCIFAR10
 
-NET_NAME = 'dense_cnn'
+NET_NAME = 'dense'
 
 
 def forward_pass(train_mode, drop_prob_placeholder):
