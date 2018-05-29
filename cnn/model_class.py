@@ -395,7 +395,7 @@ class TfClassifier:
         The file will be written to the model dir as "self.name + '.pb'",
         in ProtoBuff format.
         """
-        write_graph(self.optimize(), self.name + '_opt.pb',
+        write_graph(self.optimize(), self.name + '.pb',
                     self.save_path.parent.as_posix())
 
     def optimize(self,
