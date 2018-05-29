@@ -74,7 +74,7 @@ def predict_from_frozen(graph, inputs, input_names, output_names):
 
 def optimize_for_inference(graph_def,
                            input_names,
-                           output_name,
+                           output_names,
                            quantization,
                            add_transf=[]):
     """Optimize the model graph for inference, quantize if constructed for it.
