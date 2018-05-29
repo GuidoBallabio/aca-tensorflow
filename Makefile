@@ -18,9 +18,11 @@ $(benchmarks): results/%.json: models/%.pb
 
 $(train_opt): models/%_opt.pb: cnn/%.py
 	python -m cnn.$(basename $(notdir $<)) "$(basename $(notdir $@))" $(TRAIN_OPT)
+	mv -i cnn/$@ $@
 
 $(train_quant): models/%_quant.pb: cnn/%.py
 	python -m cnn.$(basename $(notdir $<)) "$(basename $(notdir $@))" $(QUANTIZE) $(TRAIN_OPT)
+	mv -i cnn/$@ $@
 
 $(py_files): ;
 
