@@ -376,7 +376,6 @@ class TfClassifier:
             (MODELS_DIR / self.name / 'model.pb').as_posix())
 
     def freeze(self, output_names=['softmax']):
-        #if graph is None:
         graph = self.predict_ops_graph[1]
 
         return freeze_graph(graph, output_names, self.save_path.as_posix())

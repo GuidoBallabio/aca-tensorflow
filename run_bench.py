@@ -6,7 +6,7 @@ import perf
 from cnn.utils.bench_factory import BenchmarkFactory
 
 GRAPHS_DIR = (Path(__file__).parent / "models/").absolute()
-FROZEN_NETS = ["dense_cnn", "dense_cnn_opt"]
+FROZEN_NETS = ["dense_opt", "dense_quant"]
 
 
 def main(name, runner):
