@@ -28,5 +28,5 @@ class BenchmarkFactory:
         self.predict_single = lambda: just_run_graph(self.graph, self.x_unit_size_LD, output_names)
 
     def bench(self):
-        self.runner.bench_func(self.name + '_max_batch', self.predict_test)
-        self.runner.bench_func(self.name + '_single_sample', self.predict_test)
+        self.runner.bench_func('max_batch', self.predict_test)
+        self.runner.bench_func('single_sample', self.predict_test)
