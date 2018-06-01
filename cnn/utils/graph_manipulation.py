@@ -1,5 +1,10 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from pathlib import Path
-
+import re
+from google.protobuf import text_format
+from tensorflow.core.framework import graph_pb2
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
@@ -105,3 +110,22 @@ def optimize_for_inference(graph_def,
             transforms.append(transf)
 
     return transform_graph(graph_def, input_names, output_names, transforms)
+
+def convert_graph_to_dot(input_graph, output_dot, is_input_graph_binary):
+    graph = graph_pb2.GraphDef()
+    with open(input_graph, "rb") as fh:
+        if is_input_graph_binary:
+            graph.ParseFromString(fh.read())
+        else:
+            text_format.Merge(fh.read(), graph)
+    with open(output_dot, "wt") as fh:
+        print("digraph graphname {", file=fh)
+        for node in graph.node:
+            output_name = node.name
+            print("  \"" + output_name + "\" [label=\"" + node.op + "\"];", file=fh)
+            for input_full_name in node.input:
+                parts = input_full_name.split(":")
+                input_name = re.sub(r"^\^", "", parts[0])
+                print("  \"" + input_name + "\" -> \"" + output_name + "\";", file=fh)
+        print("}", file=fh)
+        print("Graph '%s' has been converted to DOT file: '%s'." % (input_graph, output_dot))
