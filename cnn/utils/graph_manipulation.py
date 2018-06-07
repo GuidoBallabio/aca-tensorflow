@@ -7,13 +7,16 @@ from google.protobuf import text_format
 from tensorflow.core.framework import graph_pb2
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.profiler.model_analyzer import Profiler
+from tensorflow.python.profiler import option_builder
+from tensorflow.python.profiler import tfprof_logger
 from tensorflow.python.framework import graph_util
 from tensorflow.tools.graph_transforms import TransformGraph
 
 from cnn.utils.prep_inputs import init_dict_split_max
 
 MODELS_DIR = Path(__file__).parent.parent / 'models'
-
+GLOBAL_COUNTER = 0
 
 def transform_graph(graph_def, input_names, output_names, transforms):
     out_graph_def = TransformGraph(graph_def, input_names, output_names,
@@ -58,12 +61,45 @@ def load_frozen_graph(frozen_graph_path):
 
     return graph
 
+def run_graph_and_analyze(graph, input_LD, output_names):
+    global GLOBAL_COUNTER
+    builder = tf.profiler.ProfileOptionBuilder #A
+    opts = builder(builder.time_and_memory()).order_by('micros').build() #A
+    with tf.contrib.tfprof.ProfileContext('/tmp/train_dir',
+                                      trace_steps=[],
+                                      dump_steps=[]) as pctx:
+        with tf.Session(graph=graph) as sess:
+            profiler = Profiler(sess.graph)
+            run_meta = tf.RunMetadata()
+            for input_dict in input_LD:
+                GLOBAL_COUNTER += 1
+                if GLOBAL_COUNTER % 15 == 0:
+                    pctx.trace_next_step() #A
+                    pctx.dump_next_step() #A
+                    sess.run(output_names, feed_dict=input_dict, options=tf.RunOptions(
+                       trace_level=tf.RunOptions.FULL_TRACE), run_metadata=run_meta)
+                    pctx.profiler.profile_operations(options=opts) #A
+                    profiler.add_step(GLOBAL_COUNTER, run_meta)
+                    #Time (option 1 on 2)
+
+                    opts = option_builder.ProfileOptionBuilder.time_and_memory()
+                    profiler.profile_operations(options=opts)
+                    #Timeline (option 2 on 2)
+                    '''
+                    filename = '/tmp/timeline'+str(GLOBAL_COUNTER)+'.json'
+                    opts = (option_builder.ProfileOptionBuilder(
+                         option_builder.ProfileOptionBuilder.time_and_memory())
+                         .with_step(GLOBAL_COUNTER)
+                         .with_timeline_output(filename).build())
+                    profiler.profile_graph(options=opts)
+                    '''
+                else:
+                    sess.run(output_names, feed_dict=input_dict)
 
 def just_run_graph(graph, input_LD, output_names):
     with tf.Session(graph=graph) as sess:
         for input_dict in input_LD:
             sess.run(output_names, feed_dict=input_dict)
-
 
 def predict_from_frozen(graph, inputs, input_names, output_names):
 
@@ -129,3 +165,5 @@ def convert_graph_to_dot(input_graph, output_dot, is_input_graph_binary):
                 print("  \"" + input_name + "\" -> \"" + output_name + "\";", file=fh)
         print("}", file=fh)
         print("Graph '%s' has been converted to DOT file: '%s'." % (input_graph, output_dot))
+
+
