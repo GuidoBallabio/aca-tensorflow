@@ -63,6 +63,7 @@ def eval_fn(predictions):
 
     return eval_metrics
 
+
 if __name__ == '__main__':
     fitter = FitOnCIFAR10(forward_pass, loss_fn, eval_fn)
     fitter.main()

@@ -1,6 +1,7 @@
 """This module defines fitter class that implements a command line"""
 
 import argparse
+
 import tensorflow as tf
 
 from cnn.model_class import TfClassifier
@@ -11,6 +12,7 @@ BATCH_SIZE = 32
 EPOCHS = 50
 DROP_PROB = 0.5
 VALIDATION_SPLIT = 0.2
+
 
 class FitOnCIFAR10:
     def __init__(self, forward_pass, loss_fn, eval_fn):
@@ -23,8 +25,8 @@ class FitOnCIFAR10:
         x_train = dataset_preprocessing_by_keras(x_train)
         return x_train, t_train, x_test, t_test
 
-    def train_and_save(self, name, batch_size, epochs, drop_prob, validation_split,
-                       quantization, verbosity):
+    def train_and_save(self, name, batch_size, epochs, drop_prob,
+                       validation_split, quantization, verbosity):
 
         self.model = TfClassifier(
             name,
@@ -35,7 +37,7 @@ class FitOnCIFAR10:
             quantization=quantization)
 
         x_train, t_train, x_test, t_test = self.setup_data()
-        
+
         self.model.fit(
             [x_train, t_train],
             batch_size=batch_size,
@@ -47,7 +49,6 @@ class FitOnCIFAR10:
         evals = self.model.evaluate([x_test, t_test])
 
         self.model.save_optimazed_graph()
-
 
     def main(self):
         parser = argparse.ArgumentParser(description="Fit a net")
@@ -84,4 +85,3 @@ class FitOnCIFAR10:
         args = parser.parse_args()
 
         self.train_and_save(**vars(args))
-

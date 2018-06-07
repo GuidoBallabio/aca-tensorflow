@@ -5,9 +5,10 @@ from pathlib import Path
 import numpy as np
 import tensorflow as tf
 
-from cnn.utils.graph_manipulation import (MODELS_DIR, load_frozen_graph,
-                                          transform_graph, write_graph,
-                                          freeze_graph, optimize_for_inference)
+from cnn.utils.graph_manipulation import (MODELS_DIR, freeze_graph,
+                                          load_frozen_graph,
+                                          optimize_for_inference,
+                                          transform_graph, write_graph)
 from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
 
 
@@ -413,6 +414,5 @@ class TfClassifier:
             construction time then it will be finalized (from fake to real).
         """
 
-        return optimize_for_inference(self.freeze(), input_names,
-                                      output_names, self.quantization,
-                                      add_transf)
+        return optimize_for_inference(self.freeze(), input_names, output_names,
+                                      self.quantization, add_transf)
