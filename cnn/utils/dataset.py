@@ -91,7 +91,7 @@ def load_dataset_as_tensors():
                 ds['data/test'][()], ds['label/test'][()])
 
 
-def preprocess_dataset(x_train, t_train, x_test, t_test, NHWC=True):
+def preprocess_dataset(x_train, t_train, x_test, t_test, NHWC):
     """Process data: label -> one hot encoding, transpose if in NHWC order."""
 
     x_train = x_train.astype(np.float)
@@ -106,10 +106,10 @@ def preprocess_dataset(x_train, t_train, x_test, t_test, NHWC=True):
         return (x_train, t_train, x_test, t_test)
 
 
-def load_cifar10():
+def load_cifar10(NHWC=True):
     """Load cifar10 dataset as np.ndarray ready to go."""
 
-    return preprocess_dataset(*load_dataset_as_tensors())
+    return preprocess_dataset(*load_dataset_as_tensors(), NHWC)
 
 
 def dataset_preprocessing_by_keras(x_train):
