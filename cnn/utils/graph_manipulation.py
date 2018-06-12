@@ -15,8 +15,6 @@ from tensorflow.tools.graph_transforms import TransformGraph
 from cnn.utils.prep_inputs import init_dict_split_max
 
 MODELS_DIR = Path(__file__).parent.parent / 'models'
-GLOBAL_COUNTER = 0
-
 
 def transform_graph(graph_def, input_names, output_names, transforms):
     out_graph_def = TransformGraph(graph_def, input_names, output_names,
@@ -63,17 +61,17 @@ def load_frozen_graph(frozen_graph_path):
 
 
 def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
-    global GLOBAL_COUNTER
+    step_counter = 0
     builder = tf.profiler.ProfileOptionBuilder  #A
     opts = builder(builder.time_and_memory()).order_by('micros').build()  #A
     with tf.contrib.tfprof.ProfileContext(
-            '/tmp/train_dir', trace_steps=[], dump_steps=[]) as pctx:
+            '/tmp/benchmark', trace_steps=[], dump_steps=[]) as pctx:
         with tf.Session(graph=graph) as sess:
             profiler = Profiler(sess.graph)
             run_meta = tf.RunMetadata()
             for input_dict in input_LD:
-                GLOBAL_COUNTER += 1
-                if GLOBAL_COUNTER % 15 == 0:
+                step_counter += 1
+                if step_counter % 3 == 0:
                     pctx.trace_next_step()  #A
                     pctx.dump_next_step()  #A
                     sess.run(
@@ -83,7 +81,7 @@ def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
                             trace_level=tf.RunOptions.FULL_TRACE),
                         run_metadata=run_meta)
                     pctx.profiler.profile_operations(options=opts)  #A
-                    profiler.add_step(GLOBAL_COUNTER, run_meta)
+                    profiler.add_step(step_counter, run_meta)
                     if not timeline:
                         #Time (option 1 on 2)
                         opts = option_builder.ProfileOptionBuilder.time_and_memory(
@@ -91,15 +89,16 @@ def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
                         profiler.profile_operations(options=opts)
                     else:  #Timeline (option 2 on 2)
                         filename = '/tmp/timeline' + str(
-                            GLOBAL_COUNTER) + '.json'
+                            step_counter) + '.json'
                         opts = (option_builder.ProfileOptionBuilder(
                             option_builder.ProfileOptionBuilder.
-                            time_and_memory()).with_step(GLOBAL_COUNTER)
+                            time_and_memory()).with_step(step_counter)
                                 .with_timeline_output(filename).build())
                         profiler.profile_graph(options=opts)
+                elif step_counter % 20 == 0:
+                    quit() #temporaneo
                 else:
                     sess.run(output_names, feed_dict=input_dict)
-
 
 def just_run_graph(graph, input_LD, output_names):
     with tf.Session(graph=graph) as sess:
