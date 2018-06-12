@@ -23,25 +23,39 @@ class BenchmarkFactory:
         input_names = ["features"]
         output_names = ["softmax"]
 
-        #self.x_max_size_LD = init_dict_split_max([x], input_names)
-        #self.x_default_size_LD = split_and_batch([x], input_names, 32, 0)[0]
-        self.x_unit_size_LD = split_and_batch([x], input_names, 1, 0)[0]
+        self.x_1_size_LD = split_and_batch([x], input_names, 1, 0)[0]
+        self.x_16_size_LD = split_and_batch([x], input_names, 16, 0)[0]
+        self.x_32_size_LD = split_and_batch([x], input_names, 32, 0)[0]
+        self.x_64_size_LD = split_and_batch([x], input_names, 64, 0)[0]
+        self.x_max_size_LD = init_dict_split_max([x], input_names)
         self.graph = load_frozen_graph(frozen_graph_path)
 
         #Just run
-        #self.predict_test = lambda: just_run_graph(self.graph, self.x_default_size_LD, output_names)
-        self.predict_single = lambda: just_run_graph(self.graph, self.x_unit_size_LD, output_names)
+        self.predict_1 = lambda: just_run_graph(self.graph, self.x_1_size_LD, output_names)
+        self.predict_16 = lambda: just_run_graph(self.graph, self.x_16_size_LD, output_names)
+        self.predict_32 = lambda: just_run_graph(self.graph, self.x_32_size_LD, output_names)
+        self.predict_64 = lambda: just_run_graph(self.graph, self.x_64_size_LD, output_names)
+        self.predict_max = lambda: just_run_graph(self.graph, self.x_max_size_LD, output_names)
+
 
         #Analysis
-        #self.predict_test_analysis = lambda: run_graph_and_analyze(self.graph, self.x_default_size_LD, output_names)
-        self.predict_single_analisys = lambda: run_graph_and_analyze(self.graph, self.x_unit_size_LD, output_names)
+        self.predict_1_analysis = lambda: run_graph_and_analyze(self.graph, self.x_1_size_LD, output_names)
+        self.predict_16_analysis = lambda: run_graph_and_analyze(self.graph, self.x_16_size_LD, output_names)
+        self.predict_32_analysis = lambda: run_graph_and_analyze(self.graph, self.x_32_size_LD, output_names)
+        self.predict_64_analysis = lambda: run_graph_and_analyze(self.graph, self.x_64_size_LD, output_names)
+        self.predict_max_analysis = lambda: run_graph_and_analyze(self.graph, self.x_max_size_LD, output_names)
 
     def bench(self):
         if self.analysis:
-            #self.runner.bench_func('max_batch_analisys',
-            #                       self.predict_test_analysis)
-            self.runner.bench_func('single_sample_analisys',
-                                   self.predict_single_analisys)
+            self.runner.bench_func('1-batch_analysis', self.predict_1_analysis)
+            self.runner.bench_func('16-batch_analysis', self.predict_16_analysis)
+            self.runner.bench_func('32-batch_analysis', self.predict_32_analysis)
+            self.runner.bench_func('64-batch_analysis', self.predict_64_analysis)
+            self.runner.bench_func('max-batch_analysis', self.predict_max_analysis)
         else:
-            #self.runner.bench_func('max_batch', self.predict_test)
-            self.runner.bench_func('single_sample', self.predict_single)
+            self.runner.bench_func('1-batch', self.predict_1)
+            self.runner.bench_func('16-batch', self.predict_16)
+            self.runner.bench_func('32-batch', self.predict_32)
+            self.runner.bench_func('64-batch', self.predict_64)
+            self.runner.bench_func('max-batch', self.predict_max)
+
