@@ -6,6 +6,19 @@ from cnn.utils.graph_manipulation import (just_run_graph, load_frozen_graph,
                                           run_graph_and_analyze)
 from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
 
+PERC_DATA_KEEP = 0.1
+SOFT_ANALYSIS = False
+
+def keep_only_perc_data(data, perc):
+    new_data = []
+    elements = data.shape[0]
+    keep_elements = int(elements * perc)
+    count = 0
+    for e in data:
+        new_data.append(e)
+        count += 1
+        if count == keep_elements:
+             return np.array(new_data)
 
 class BenchmarkFactory:
     def __init__(self, frozen_graph_path, runner, name=None, analysis=True):
@@ -20,6 +33,7 @@ class BenchmarkFactory:
         #Input preparation
         data = load_cifar10()
         x = dataset_preprocessing_by_keras(data[2])
+        x = keep_only_perc_data(x, PERC_DATA_KEEP)
         input_names = ["features"]
         output_names = ["softmax"]
 
@@ -45,8 +59,9 @@ class BenchmarkFactory:
         self.predict_max_analysis = lambda: run_graph_and_analyze(self.graph, self.x_max_size_LD, output_names)
 
     def bench(self):
-        if self.analysis:
-            self.runner.bench_func('1-batch_analysis', self.predict_1_analysis)
+        if self.analysis and not SOFT_ANALYSIS:
+            self.runner.bench_func('1-batch_analysis', 
+                                   self.predict_1_analysis)
             self.runner.bench_func('16-batch_analysis',
                                    self.predict_16_analysis)
             self.runner.bench_func('32-batch_analysis',
@@ -55,9 +70,14 @@ class BenchmarkFactory:
                                    self.predict_64_analysis)
             self.runner.bench_func('max-batch_analysis',
                                    self.predict_max_analysis)
-        else:
+        elif not self.analysis and not SOFT_ANALYSIS:
             self.runner.bench_func('1-batch', self.predict_1)
             self.runner.bench_func('16-batch', self.predict_16)
             self.runner.bench_func('32-batch', self.predict_32)
             self.runner.bench_func('64-batch', self.predict_64)
             self.runner.bench_func('max-batch', self.predict_max)
+        elif self.analysis and not SOFT_ANALYSIS:
+            self.runner.bench_func('32-batch_analysis',
+                                   self.predict_64_analysis)
+        else:
+            self.runner.bench_func('32-batch', self.predict_64)
