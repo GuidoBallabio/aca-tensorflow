@@ -223,10 +223,10 @@ class TfClassifier:
                 run_metadata = tf.RunMetadata()
                 run_options = tf.RunOptions(
                     trace_level=tf.RunOptions.FULL_TRACE)
-                print(
-                    "For training: tensorboard --logdir=" + self.tb_path_train)
-                print(
-                    "For validation: tensorboard --logdir=" + self.tb_path_val)
+                print("For training: tensorboard --logdir=" +
+                      self.tb_path_train)
+                print("For validation: tensorboard --logdir=" +
+                      self.tb_path_val)
                 i = 1
             else:
                 run_metadata = None

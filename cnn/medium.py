@@ -1,4 +1,4 @@
-"""This module defines a Dense CNN"""
+"""This module defines a Normal CNN"""
 
 import numpy as np
 import tensorflow as tf
@@ -21,12 +21,19 @@ def forward_pass(train_mode, drop_prob_placeholder):
 
     pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=(2, 2), strides=2)
 
-    pool1_flat = tf.layers.flatten(pool1)
+    conv2 = tf.layers.conv2d(
+        inputs=pool1,
+        filters=64,
+        kernel_size=5,
+        padding="same",
+        activation=tf.nn.relu)
 
-    dense1 = tf.layers.dense(
-        inputs=pool1_flat, units=512, activation=tf.nn.relu)
+    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=(2, 2), strides=2)
 
-    dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.relu)
+    pool2_flat = tf.layers.flatten(pool2)
+
+    dense = tf.layers.dense(
+        inputs=pool2_flat, units=1024, activation=tf.nn.relu)
 
     dropout = tf.layers.dropout(
         inputs=dense, rate=drop_prob_placeholder, training=train_mode)

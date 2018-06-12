@@ -1,4 +1,4 @@
-nets = dense
+nets = medium dense conv
 opt_nets = $(addsuffix _opt, ${nets})
 quant_nets = $(addsuffix _quant, ${nets})
 all_nets = $(opt_nets) $(quant_nets)

@@ -1,11 +1,11 @@
 from pathlib import Path
 
 import perf
-
 from cnn.utils.dataset import dataset_preprocessing_by_keras, load_cifar10
 from cnn.utils.graph_manipulation import (just_run_graph, load_frozen_graph,
                                           run_graph_and_analyze)
 from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
+
 
 class BenchmarkFactory:
     def __init__(self, frozen_graph_path, runner, name=None, analysis=True):
@@ -37,7 +37,6 @@ class BenchmarkFactory:
         self.predict_64 = lambda: just_run_graph(self.graph, self.x_64_size_LD, output_names)
         self.predict_max = lambda: just_run_graph(self.graph, self.x_max_size_LD, output_names)
 
-
         #Analysis
         self.predict_1_analysis = lambda: run_graph_and_analyze(self.graph, self.x_1_size_LD, output_names)
         self.predict_16_analysis = lambda: run_graph_and_analyze(self.graph, self.x_16_size_LD, output_names)
@@ -48,14 +47,17 @@ class BenchmarkFactory:
     def bench(self):
         if self.analysis:
             self.runner.bench_func('1-batch_analysis', self.predict_1_analysis)
-            self.runner.bench_func('16-batch_analysis', self.predict_16_analysis)
-            self.runner.bench_func('32-batch_analysis', self.predict_32_analysis)
-            self.runner.bench_func('64-batch_analysis', self.predict_64_analysis)
-            self.runner.bench_func('max-batch_analysis', self.predict_max_analysis)
+            self.runner.bench_func('16-batch_analysis',
+                                   self.predict_16_analysis)
+            self.runner.bench_func('32-batch_analysis',
+                                   self.predict_32_analysis)
+            self.runner.bench_func('64-batch_analysis',
+                                   self.predict_64_analysis)
+            self.runner.bench_func('max-batch_analysis',
+                                   self.predict_max_analysis)
         else:
             self.runner.bench_func('1-batch', self.predict_1)
             self.runner.bench_func('16-batch', self.predict_16)
             self.runner.bench_func('32-batch', self.predict_32)
             self.runner.bench_func('64-batch', self.predict_64)
             self.runner.bench_func('max-batch', self.predict_max)
-

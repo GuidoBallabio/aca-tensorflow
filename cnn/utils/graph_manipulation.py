@@ -16,6 +16,7 @@ from cnn.utils.prep_inputs import init_dict_split_max
 
 MODELS_DIR = Path(__file__).parent.parent / 'models'
 
+
 def transform_graph(graph_def, input_names, output_names, transforms):
     out_graph_def = TransformGraph(graph_def, input_names, output_names,
                                    transforms)
@@ -88,17 +89,17 @@ def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
                         )
                         profiler.profile_operations(options=opts)
                     else:  #Timeline (option 2 on 2)
-                        filename = '/tmp/timeline' + str(
-                            step_counter) + '.json'
+                        filename = '/tmp/timeline' + str(step_counter) + '.json'
                         opts = (option_builder.ProfileOptionBuilder(
                             option_builder.ProfileOptionBuilder.
                             time_and_memory()).with_step(step_counter)
                                 .with_timeline_output(filename).build())
                         profiler.profile_graph(options=opts)
                 elif step_counter % 20 == 0:
-                    quit() #temporaneo
+                    quit()  #temporaneo
                 else:
                     sess.run(output_names, feed_dict=input_dict)
+
 
 def just_run_graph(graph, input_LD, output_names):
     with tf.Session(graph=graph) as sess:

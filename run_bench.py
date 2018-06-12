@@ -2,7 +2,6 @@
 from pathlib import Path
 
 import perf
-
 from cnn.utils.bench_factory import BenchmarkFactory
 
 GRAPHS_DIR = (Path(__file__).parent / "models/").absolute()
