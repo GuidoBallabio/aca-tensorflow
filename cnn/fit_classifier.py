@@ -8,8 +8,8 @@ from cnn.model_class import TfClassifier
 from cnn.utils.dataset import dataset_preprocessing_by_keras, load_cifar10
 from cnn.utils.graph_manipulation import write_graph
 
-BATCH_SIZE = 32
-EPOCHS = 50
+BATCH_SIZE = 64
+EPOCHS = 5
 DROP_PROB = 0.5
 VALIDATION_SPLIT = 0.2
 

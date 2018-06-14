@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
+import time as tm
 from google.protobuf import text_format
 from tensorflow.core.framework import graph_pb2
 from tensorflow.python.framework import graph_util
@@ -90,10 +91,11 @@ def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
                         profiler.profile_operations(options=opts)
                     else:
                         #Timeline (option 2 on 2)
-                        filename = '/tmp/timeline' + str(step_counter) + '.json'
+                        timestamp = int(tm.time())
+                        filename = '/tmp/timeline' + str(timestamp) + '.json'
                         opts = (option_builder.ProfileOptionBuilder(
                             option_builder.ProfileOptionBuilder.
-                            time_and_memory()).with_step(step_counter)
+                            time_and_memory()).with_step(timestamp)
                                 .with_timeline_output(filename).build())
                         profiler.profile_graph(options=opts)
                 else:

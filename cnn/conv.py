@@ -14,7 +14,7 @@ def forward_pass(train_mode, drop_prob_placeholder):
 
     conv1 = tf.layers.conv2d(
         inputs=features,
-        filters=64,
+        filters=32,
         kernel_size=2,
         padding="same",
         activation=tf.nn.relu)
@@ -23,7 +23,7 @@ def forward_pass(train_mode, drop_prob_placeholder):
 
     conv2 = tf.layers.conv2d(
         inputs=pool1,
-        filters=256,
+        filters=128,
         kernel_size=2,
         padding="same",
         activation=tf.nn.relu)
@@ -32,7 +32,7 @@ def forward_pass(train_mode, drop_prob_placeholder):
 
     conv3 = tf.layers.conv2d(
         inputs=pool2,
-        filters=128,
+        filters=256,
         kernel_size=2,
         padding="same",
         activation=tf.nn.relu)

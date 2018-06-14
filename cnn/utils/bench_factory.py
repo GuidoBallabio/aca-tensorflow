@@ -11,7 +11,6 @@ from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
 PERC_DATA_KEEP = 0.1
 SOFT_ANALYSIS = False
 
-
 class BenchmarkFactory:
     def __init__(self, frozen_graph_path, runner, name=None, analysis=False):
         if name is None:
@@ -67,7 +66,7 @@ class BenchmarkFactory:
             self.runner.bench_func('32-batch', self.predict_32)
             self.runner.bench_func('64-batch', self.predict_64)
             self.runner.bench_func('max-batch', self.predict_max)
-        elif self.analysis and not SOFT_ANALYSIS:
+        elif self.analysis and SOFT_ANALYSIS:
             self.runner.bench_func('32-batch_analysis',
                                    self.predict_64_analysis)
         else:
