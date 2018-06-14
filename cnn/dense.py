@@ -29,7 +29,7 @@ def forward_pass(train_mode, drop_prob_placeholder):
     dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.relu)
 
     dropout = tf.layers.dropout(
-        inputs=dense, rate=drop_prob_placeholder, training=train_mode)
+        inputs=dense2, rate=drop_prob_placeholder, training=train_mode)
 
     return tf.layers.dense(inputs=dropout, units=10, name="logits")
 

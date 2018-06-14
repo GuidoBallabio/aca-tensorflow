@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from cnn.fit_classifier import FitOnCIFAR10
 
-NET_NAME = 'dense'
+NET_NAME = 'conv'
 
 
 def forward_pass(train_mode, drop_prob_placeholder):
@@ -14,8 +14,8 @@ def forward_pass(train_mode, drop_prob_placeholder):
 
     conv1 = tf.layers.conv2d(
         inputs=features,
-        filters=256,
-        kernel_size=5,
+        filters=64,
+        kernel_size=2,
         padding="same",
         activation=tf.nn.relu)
 
@@ -23,26 +23,26 @@ def forward_pass(train_mode, drop_prob_placeholder):
 
     conv2 = tf.layers.conv2d(
         inputs=pool1,
-        filters=512,
-        kernel_size=5,
+        filters=256,
+        kernel_size=2,
         padding="same",
         activation=tf.nn.relu)
 
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=(2, 2), strides=2)
 
-    conv2 = tf.layers.conv2d(
-        inputs=pool1,
-        filters=64,
-        kernel_size=5,
+    conv3 = tf.layers.conv2d(
+        inputs=pool2,
+        filters=128,
+        kernel_size=2,
         padding="same",
         activation=tf.nn.relu)
 
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=(2, 2), strides=2)
+    pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=(2, 2), strides=2)
 
-    pool2_flat = tf.layers.flatten(pool2)
+    pool3_flat = tf.layers.flatten(pool3)
 
     dense = tf.layers.dense(
-        inputs=pool2_flat, units=256, activation=tf.nn.relu)
+        inputs=pool3_flat, units=256, activation=tf.nn.relu)
 
     dropout = tf.layers.dropout(
         inputs=dense, rate=drop_prob_placeholder, training=train_mode)
