@@ -223,10 +223,10 @@ class TfClassifier:
                 run_metadata = tf.RunMetadata()
                 run_options = tf.RunOptions(
                     trace_level=tf.RunOptions.FULL_TRACE)
-                print("For training: tensorboard --logdir=" +
-                      self.tb_path_train)
-                print("For validation: tensorboard --logdir=" +
-                      self.tb_path_val)
+                print(
+                    "For training: tensorboard --logdir=" + self.tb_path_train)
+                print(
+                    "For validation: tensorboard --logdir=" + self.tb_path_val)
                 i = 1
             else:
                 run_metadata = None
@@ -376,7 +376,7 @@ class TfClassifier:
         return load_frozen_graph(
             (MODELS_DIR / self.name / 'model.pb').as_posix())
 
-    def freeze(self, output_names=['softmax']):
+    def freeze(self, output_names=['softmax', 'classes']):
         graph = self.predict_ops_graph[1]
 
         return freeze_graph(graph, output_names, self.save_path.as_posix())
@@ -388,7 +388,7 @@ class TfClassifier:
         in ProtoBuff format.
         """
         write_graph(self.freeze(), self.name + '.pb',
-                    self.save_path.parent.as_posix())
+                    self.save_path.parent.parent.as_posix())
 
     def save_optimazed_graph(self):
         """Optimize the prediction graph with last saved data and write it to disk.
@@ -397,12 +397,12 @@ class TfClassifier:
         in ProtoBuff format.
         """
         write_graph(self.optimize(), self.name + '.pb',
-                    self.save_path.parent.as_posix())
+                    self.save_path.parent.parent.as_posix())
 
     def optimize(self,
                  add_transf=[],
                  input_names=['features'],
-                 output_names=['softmax']):
+                 output_names=['softmax', 'classes']):
         """Optimize the model graph for inference, quantize if constructed for it.
 
         Args:

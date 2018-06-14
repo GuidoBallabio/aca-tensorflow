@@ -2,10 +2,14 @@
 from pathlib import Path
 
 import perf
+
 from cnn.utils.bench_factory import BenchmarkFactory
 
 GRAPHS_DIR = (Path(__file__).parent / "models/").absolute()
-FROZEN_NETS = ["dense_opt", "dense_quant"]
+FROZEN_NETS = [
+    'dense_opt', 'dense_quant', 'conv_opt', 'conv_quant', 'medium_opt',
+    'medium_quant'
+]
 
 
 def main(name, runner):
