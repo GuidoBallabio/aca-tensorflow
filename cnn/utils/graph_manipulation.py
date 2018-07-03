@@ -1,11 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
 import re
+import time as tm
 from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-import time as tm
 from google.protobuf import text_format
 from tensorflow.core.framework import graph_pb2
 from tensorflow.python.framework import graph_util

@@ -11,6 +11,25 @@ Train a CNN model for Cifar-10 or MNIST dataset with Tensorflow then use Quantiz
 Details:
 ########
 
+Benchmark run on CPU:
+*********************
+Intel-Core-i7-6500U
+
+Cache Details:
+**************
+
+L1$	128 KiB	
+   - L1I$	64 KiB	2x32 KiB	8-way set associative	 
+   - L1D$	64 KiB	2x32 KiB    8-way set associative   write-back
+L2$	512 KiB 2x256   KiB   4-way set associative   write-back
+L3$ 4   MiB 2x2     MiB	 	                      write-back
+
+* https://ark.intel.com/products/88194/Intel-Core-i7-6500U-Processor-4M-Cache-up-to-3_10-GHz
+* https://en.wikichip.org/wiki/intel/core_i7/i7-6500u
+
+(requirments lack 'perf and tensorflow-profiler for cache analysis as well as jupyter notebooks)
+
+
 Important Notes:
 ****************
 

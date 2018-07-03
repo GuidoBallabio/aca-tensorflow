@@ -11,6 +11,7 @@ from cnn.utils.prep_inputs import init_dict_split_max, split_and_batch
 PERC_DATA_KEEP = 0.1
 SOFT_ANALYSIS = False
 
+
 class BenchmarkFactory:
     def __init__(self, frozen_graph_path, runner, name=None, analysis=False):
         if name is None:
