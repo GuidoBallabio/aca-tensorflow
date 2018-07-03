@@ -16,7 +16,7 @@ Benchmark run on CPU:
 Intel-Core-i7-6500U
 
 Cache Details:
-**************
+--------------
 
 L1	128 KiB	
    - L1I	64 KiB	2x32 KiB	8-way set associative	 
