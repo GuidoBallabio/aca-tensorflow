@@ -1,0 +1,239 @@
+## Profiler output at steps 1, 2 and 1000 of medium_quant net
+## Command: sync; sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"; python run_bench.py medium_quant --quiet > output.txt
+
+
+Parsing Inputs...
+Parsing Inputs...
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+op: The nodes are operation kernel type, such as MatMul, Conv2D. Graph nodes belonging to the same type are aggregated together.
+requested bytes: The memory requested by the operation, accumulatively.
+total execution time: Sum of accelerator execution time and cpu execution time.
+cpu execution time: The time from the start to the end of the operation. It's the sum of actual cpu run time plus the time that it spends waiting if part of computation is launched asynchronously.
+accelerator execution time: Time spent executing on the accelerator. This is normally measured by the actual hardware library.
+
+Profile:
+node name | requested bytes | total execution time | accelerator execution time | cpu execution time
+Softmax                               0B (0.00%, 0.00%),      59.68ms (100.00%, 33.25%),             0us (0.00%, 0.00%),      59.68ms (100.00%, 33.25%)
+QuantizedMaxPool               24.61KB (100.00%, 0.25%),       50.21ms (66.75%, 27.97%),             0us (0.00%, 0.00%),       50.21ms (66.75%, 27.97%)
+Shape                               32B (99.75%, 0.00%),       32.14ms (38.78%, 17.91%),             0us (0.00%, 0.00%),       32.14ms (38.78%, 17.91%)
+QuantizedMatMul                  8.30KB (99.75%, 0.09%),       19.55ms (20.88%, 10.89%),             0us (0.00%, 0.00%),       19.55ms (20.88%, 10.89%)
+Pack                                16B (99.66%, 0.00%),          9.88ms (9.99%, 5.50%),             0us (0.00%, 0.00%),          9.88ms (9.99%, 5.50%)
+QuantizedConv2D                393.25KB (99.66%, 4.06%),          3.64ms (4.49%, 2.03%),             0us (0.00%, 0.00%),          3.64ms (4.49%, 2.03%)
+QuantizedBiasAdd               401.55KB (95.60%, 4.15%),          1.64ms (2.46%, 0.92%),             0us (0.00%, 0.00%),          1.64ms (2.46%, 0.92%)
+StridedSlice                         8B (91.45%, 0.00%),          1.42ms (1.54%, 0.79%),             0us (0.00%, 0.00%),          1.42ms (1.54%, 0.79%)
+Requantize                     200.87KB (91.45%, 2.07%),           664us (0.75%, 0.37%),             0us (0.00%, 0.00%),           664us (0.75%, 0.37%)
+RequantizationRange                 64B (89.38%, 0.00%),           226us (0.38%, 0.13%),             0us (0.00%, 0.00%),           226us (0.38%, 0.13%)
+QuantizedRelu                  100.40KB (89.38%, 1.04%),           114us (0.26%, 0.06%),             0us (0.00%, 0.00%),           114us (0.26%, 0.06%)
+Const                          129.88KB (88.34%, 1.34%),            98us (0.19%, 0.05%),             0us (0.00%, 0.00%),            98us (0.19%, 0.05%)
+QuantizedReshape                    16B (87.00%, 0.00%),            60us (0.14%, 0.03%),             0us (0.00%, 0.00%),            60us (0.14%, 0.03%)
+QuantizeV2                       6.16KB (87.00%, 0.06%),            44us (0.11%, 0.02%),             0us (0.00%, 0.00%),            44us (0.11%, 0.02%)
+Dequantize                      32.85KB (86.94%, 0.34%),            36us (0.08%, 0.02%),             0us (0.00%, 0.00%),            36us (0.08%, 0.02%)
+Max                                  8B (86.60%, 0.00%),            32us (0.06%, 0.02%),             0us (0.00%, 0.00%),            32us (0.06%, 0.02%)
+_retval_softmax_0_0                   0B (0.00%, 0.00%),            12us (0.04%, 0.01%),             0us (0.00%, 0.00%),            12us (0.04%, 0.01%)
+Min                                  8B (86.60%, 0.00%),            10us (0.04%, 0.01%),             0us (0.00%, 0.00%),            10us (0.04%, 0.01%)
+Reshape                               0B (0.00%, 0.00%),             8us (0.03%, 0.00%),             0us (0.00%, 0.00%),             8us (0.03%, 0.00%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_1__cf__1            8B (86.60%, 0.00%),             6us (0.03%, 0.00%),             0us (0.00%, 0.00%),             6us (0.03%, 0.00%)
+_arg_features_0_0                     0B (0.00%, 0.00%),             6us (0.02%, 0.00%),             0us (0.00%, 0.00%),             6us (0.02%, 0.00%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-2            8B (86.60%, 0.00%),             6us (0.02%, 0.00%),             0us (0.00%, 0.00%),             6us (0.02%, 0.00%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-0          128B (86.60%, 0.00%),             4us (0.02%, 0.00%),             0us (0.00%, 0.00%),             4us (0.02%, 0.00%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_0__cf__0       8.39MB (86.60%, 86.60%),             4us (0.02%, 0.00%),             0us (0.00%, 0.00%),             4us (0.02%, 0.00%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-0            64B (0.00%, 0.00%),             4us (0.01%, 0.00%),             0us (0.00%, 0.00%),             4us (0.01%, 0.00%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-1             8B (0.00%, 0.00%),             4us (0.01%, 0.00%),             0us (0.00%, 0.00%),             4us (0.01%, 0.00%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-0            20B (0.00%, 0.00%),             4us (0.01%, 0.00%),             0us (0.00%, 0.00%),             4us (0.01%, 0.00%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-2             8B (0.00%, 0.00%),             4us (0.01%, 0.00%),             0us (0.00%, 0.00%),             4us (0.01%, 0.00%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-2             8B (0.00%, 0.00%),             2us (0.00%, 0.00%),             0us (0.00%, 0.00%),             2us (0.00%, 0.00%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-1             8B (0.00%, 0.00%),             2us (0.00%, 0.00%),             0us (0.00%, 0.00%),             2us (0.00%, 0.00%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-1             8B (0.00%, 0.00%),             2us (0.00%, 0.00%),             0us (0.00%, 0.00%),             2us (0.00%, 0.00%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_2__cf__2             8B (0.00%, 0.00%),             2us (0.00%, 0.00%),             0us (0.00%, 0.00%),             2us (0.00%, 0.00%)
+
+======================End of Report==========================
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+op: The nodes are operation kernel type, such as MatMul, Conv2D. Graph nodes belonging to the same type are aggregated together.
+requested bytes: The memory requested by the operation, accumulatively.
+total execution time: Sum of accelerator execution time and cpu execution time.
+cpu execution time: The time from the start to the end of the operation. It's the sum of actual cpu run time plus the time that it spends waiting if part of computation is launched asynchronously.
+accelerator execution time: Time spent executing on the accelerator. This is normally measured by the actual hardware library.
+
+Profile:
+node name | requested bytes | total execution time | accelerator execution time | cpu execution time
+Softmax                               0B (0.00%, 0.00%),      29.84ms (100.00%, 31.94%),             0us (0.00%, 0.00%),      29.84ms (100.00%, 31.94%)
+QuantizedMaxPool               18.46KB (100.00%, 0.25%),       25.15ms (68.06%, 26.92%),             0us (0.00%, 0.00%),       25.15ms (68.06%, 26.92%)
+Shape                               24B (99.75%, 0.00%),       16.07ms (41.14%, 17.20%),             0us (0.00%, 0.00%),       16.07ms (41.14%, 17.20%)
+QuantizedMatMul                  6.23KB (99.75%, 0.09%),       12.27ms (23.94%, 13.13%),             0us (0.00%, 0.00%),       12.27ms (23.94%, 13.13%)
+Pack                                12B (99.66%, 0.00%),         4.94ms (10.80%, 5.29%),             0us (0.00%, 0.00%),         4.94ms (10.80%, 5.29%)
+QuantizedConv2D                294.94KB (99.66%, 4.06%),          2.35ms (5.52%, 2.51%),             0us (0.00%, 0.00%),          2.35ms (5.52%, 2.51%)
+QuantizedBiasAdd               301.16KB (95.60%, 4.15%),          1.19ms (3.01%, 1.27%),             0us (0.00%, 0.00%),          1.19ms (3.01%, 1.27%)
+StridedSlice                         6B (91.45%, 0.00%),           712us (1.73%, 0.76%),             0us (0.00%, 0.00%),           712us (1.73%, 0.76%)
+Requantize                     150.65KB (91.45%, 2.07%),           449us (0.97%, 0.48%),             0us (0.00%, 0.00%),           449us (0.97%, 0.48%)
+RequantizationRange                 48B (89.38%, 0.00%),           158us (0.49%, 0.17%),             0us (0.00%, 0.00%),           158us (0.49%, 0.17%)
+QuantizedRelu                   75.30KB (89.38%, 1.04%),            82us (0.32%, 0.09%),             0us (0.00%, 0.00%),            82us (0.32%, 0.09%)
+Const                           97.41KB (88.34%, 1.34%),            59us (0.24%, 0.06%),             0us (0.00%, 0.00%),            59us (0.24%, 0.06%)
+QuantizeV2                       4.62KB (87.00%, 0.06%),            35us (0.17%, 0.04%),             0us (0.00%, 0.00%),            35us (0.17%, 0.04%)
+QuantizedReshape                    12B (86.94%, 0.00%),            31us (0.13%, 0.03%),             0us (0.00%, 0.00%),            31us (0.13%, 0.03%)
+Dequantize                      24.64KB (86.94%, 0.34%),            25us (0.10%, 0.03%),             0us (0.00%, 0.00%),            25us (0.10%, 0.03%)
+Max                                  6B (86.60%, 0.00%),            20us (0.07%, 0.02%),             0us (0.00%, 0.00%),            20us (0.07%, 0.02%)
+Min                                  6B (86.60%, 0.00%),             8us (0.05%, 0.01%),             0us (0.00%, 0.00%),             8us (0.05%, 0.01%)
+_retval_softmax_0_0                   0B (0.00%, 0.00%),             6us (0.04%, 0.01%),             0us (0.00%, 0.00%),             6us (0.04%, 0.01%)
+Reshape                               0B (0.00%, 0.00%),             5us (0.04%, 0.01%),             0us (0.00%, 0.00%),             5us (0.04%, 0.01%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_1__cf__1            6B (86.60%, 0.00%),             4us (0.03%, 0.00%),             0us (0.00%, 0.00%),             4us (0.03%, 0.00%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-2            6B (86.60%, 0.00%),             4us (0.03%, 0.00%),             0us (0.00%, 0.00%),             4us (0.03%, 0.00%)
+_arg_features_0_0                     0B (0.00%, 0.00%),             4us (0.02%, 0.00%),             0us (0.00%, 0.00%),             4us (0.02%, 0.00%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-0           15B (86.60%, 0.00%),             3us (0.02%, 0.00%),             0us (0.00%, 0.00%),             3us (0.02%, 0.00%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-0           48B (86.60%, 0.00%),             3us (0.02%, 0.00%),             0us (0.00%, 0.00%),             3us (0.02%, 0.00%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-1            6B (86.60%, 0.00%),             3us (0.01%, 0.00%),             0us (0.00%, 0.00%),             3us (0.01%, 0.00%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-0           96B (86.60%, 0.00%),             2us (0.01%, 0.00%),             0us (0.00%, 0.00%),             2us (0.01%, 0.00%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_0__cf__0       6.29MB (86.60%, 86.60%),             2us (0.01%, 0.00%),             0us (0.00%, 0.00%),             2us (0.01%, 0.00%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-2             6B (0.00%, 0.00%),             2us (0.01%, 0.00%),             0us (0.00%, 0.00%),             2us (0.01%, 0.00%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-2             6B (0.00%, 0.00%),             1us (0.00%, 0.00%),             0us (0.00%, 0.00%),             1us (0.00%, 0.00%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-1             6B (0.00%, 0.00%),             1us (0.00%, 0.00%),             0us (0.00%, 0.00%),             1us (0.00%, 0.00%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-1             6B (0.00%, 0.00%),             1us (0.00%, 0.00%),             0us (0.00%, 0.00%),             1us (0.00%, 0.00%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_2__cf__2             6B (0.00%, 0.00%),             1us (0.00%, 0.00%),             0us (0.00%, 0.00%),             1us (0.00%, 0.00%)
+
+======================End of Report==========================
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+
+==================Model Analysis Report======================
+
+Doc:
+op: The nodes are operation kernel type, such as MatMul, Conv2D. Graph nodes belonging to the same type are aggregated together.
+requested bytes: The memory requested by the operation, accumulatively.
+total execution time: Sum of accelerator execution time and cpu execution time.
+cpu execution time: The time from the start to the end of the operation. It's the sum of actual cpu run time plus the time that it spends waiting if part of computation is launched asynchronously.
+accelerator execution time: Time spent executing on the accelerator. This is normally measured by the actual hardware library.
+
+Profile:
+node name | requested bytes | total execution time | accelerator execution time | cpu execution time
+QuantizedMatMul                 6.89KB (100.00%, 0.09%),       8.16ms (100.00%, 62.24%),             0us (0.00%, 0.00%),       8.16ms (100.00%, 62.24%)
+QuantizedConv2D                326.42KB (99.91%, 4.06%),        1.76ms (37.76%, 13.40%),             0us (0.00%, 0.00%),        1.76ms (37.76%, 13.40%)
+QuantizedBiasAdd               333.31KB (95.85%, 4.15%),         1.23ms (24.36%, 9.36%),             0us (0.00%, 0.00%),         1.23ms (24.36%, 9.36%)
+QuantizedMaxPool                20.43KB (91.71%, 0.25%),          478us (15.01%, 3.64%),             0us (0.00%, 0.00%),          478us (15.01%, 3.64%)
+Softmax                               0B (0.00%, 0.00%),          403us (11.36%, 3.07%),             0us (0.00%, 0.00%),          403us (11.36%, 3.07%)
+Requantize                     166.73KB (91.46%, 2.07%),           395us (8.29%, 3.01%),             0us (0.00%, 0.00%),           395us (8.29%, 3.01%)
+Shape                               26B (89.38%, 0.00%),           214us (5.28%, 1.63%),             0us (0.00%, 0.00%),           214us (5.28%, 1.63%)
+RequantizationRange                 52B (89.38%, 0.00%),           153us (3.64%, 1.17%),             0us (0.00%, 0.00%),           153us (3.64%, 1.17%)
+QuantizedRelu                   83.34KB (89.38%, 1.04%),            78us (2.48%, 0.59%),             0us (0.00%, 0.00%),            78us (2.48%, 0.59%)
+Pack                                13B (88.34%, 0.00%),            72us (1.88%, 0.55%),             0us (0.00%, 0.00%),            72us (1.88%, 0.55%)
+Const                          107.79KB (88.34%, 1.34%),            42us (1.33%, 0.32%),             0us (0.00%, 0.00%),            42us (1.33%, 0.32%)
+QuantizeV2                       5.11KB (87.00%, 0.06%),            35us (1.01%, 0.27%),             0us (0.00%, 0.00%),            35us (1.01%, 0.27%)
+Dequantize                      27.27KB (86.94%, 0.34%),            23us (0.75%, 0.18%),             0us (0.00%, 0.00%),            23us (0.75%, 0.18%)
+StridedSlice                         6B (86.60%, 0.00%),            21us (0.57%, 0.16%),             0us (0.00%, 0.00%),            21us (0.57%, 0.16%)
+Max                                  6B (86.60%, 0.00%),            17us (0.41%, 0.13%),             0us (0.00%, 0.00%),            17us (0.41%, 0.13%)
+Min                                  6B (86.60%, 0.00%),             9us (0.28%, 0.07%),             0us (0.00%, 0.00%),             9us (0.28%, 0.07%)
+Reshape                               0B (0.00%, 0.00%),             5us (0.21%, 0.04%),             0us (0.00%, 0.00%),             5us (0.21%, 0.04%)
+QuantizedReshape                    13B (86.60%, 0.00%),             4us (0.18%, 0.03%),             0us (0.00%, 0.00%),             4us (0.18%, 0.03%)
+_arg_features_0_0                     0B (0.00%, 0.00%),             3us (0.14%, 0.02%),             0us (0.00%, 0.00%),             3us (0.14%, 0.02%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-0           53B (86.60%, 0.00%),             2us (0.12%, 0.02%),             0us (0.00%, 0.00%),             2us (0.12%, 0.02%)
+_retval_softmax_0_0                   0B (0.00%, 0.00%),             2us (0.11%, 0.02%),             0us (0.00%, 0.00%),             2us (0.11%, 0.02%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_0__cf__0       6.96MB (86.60%, 86.60%),             2us (0.09%, 0.02%),             0us (0.00%, 0.00%),             2us (0.09%, 0.02%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-0            16B (0.00%, 0.00%),             1us (0.08%, 0.01%),             0us (0.00%, 0.00%),             1us (0.08%, 0.01%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-2             6B (0.00%, 0.00%),             1us (0.07%, 0.01%),             0us (0.00%, 0.00%),             1us (0.07%, 0.01%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-1             6B (0.00%, 0.00%),             1us (0.06%, 0.01%),             0us (0.00%, 0.00%),             1us (0.06%, 0.01%)
+ConstantFolding/conv2d_1/BiasAdd_eightbit/conv2d_1/bias/quantize-folded-0           106B (0.00%, 0.00%),             1us (0.05%, 0.01%),             0us (0.00%, 0.00%),             1us (0.05%, 0.01%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-1             6B (0.00%, 0.00%),             1us (0.05%, 0.01%),             0us (0.00%, 0.00%),             1us (0.05%, 0.01%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-2             6B (0.00%, 0.00%),             1us (0.04%, 0.01%),             0us (0.00%, 0.00%),             1us (0.04%, 0.01%)
+ConstantFolding/conv2d/BiasAdd_eightbit/conv2d/bias/quantize-folded-1             6B (0.00%, 0.00%),             1us (0.03%, 0.01%),             0us (0.00%, 0.00%),             1us (0.03%, 0.01%)
+ConstantFolding/logits/BiasAdd_eightbit/logits/bias/quantize-folded-2             6B (0.00%, 0.00%),             1us (0.02%, 0.01%),             0us (0.00%, 0.00%),             1us (0.02%, 0.01%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_1__cf__1             6B (0.00%, 0.00%),             1us (0.02%, 0.01%),             0us (0.00%, 0.00%),             1us (0.02%, 0.01%)
+dense/weights_quant/FakeQuantWithMinMaxVars_eightbit/requantize/_2__cf__2             6B (0.00%, 0.00%),             1us (0.01%, 0.01%),             0us (0.00%, 0.00%),             1us (0.01%, 0.01%)
+
+======================End of Report==========================
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+

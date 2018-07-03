@@ -1,0 +1,25 @@
+# started on Tue Jul  3 17:57:12 2018
+
+
+ Performance counter stats for 'python run_bench.py medium_opt':
+
+    76.076.451.357      cache-references                                              (24,95%)
+    34.405.508.776      cache-misses              #   45,225 % of all cache refs      (33,34%)
+ 1.360.358.894.787      cycles                                                        (33,30%)
+ 1.784.121.078.886      instructions              #    1,31  insn per cycle           (41,66%)
+   175.358.342.836      branches                                                      (41,73%)
+        13.494.076      faults                                                      
+           268.433      migrations                                                  
+   499.004.606.740      L1-dcache-loads                                               (41,76%)
+    49.984.453.600      L1-dcache-load-misses     #   10,02% of all L1-dcache hits    (41,80%)
+   120.933.857.424      L1-dcache-stores                                              (41,74%)
+   <not supported>      L1-dcache-store-misses                                      
+   <not supported>      L1-dcache-prefetches                                        
+   <not supported>      L1-dcache-prefetch-misses                                   
+    12.575.519.010      LLC-loads                                                     (33,33%)
+     2.416.100.709      LLC-load-misses           #   19,21% of all LL-cache hits     (33,28%)
+     3.463.757.342      LLC-stores                                                    (16,63%)
+     1.780.805.654      LLC-store-misses                                              (16,68%)
+
+     369,084664546 seconds time elapsed
+

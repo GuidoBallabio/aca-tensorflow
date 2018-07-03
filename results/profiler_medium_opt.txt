@@ -1,0 +1,149 @@
+## Profiler output at steps 1, 2 and 1000 of medium_opt net
+## Command: sync; sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"; python run_bench.py medium_opt --quiet > output.txt
+
+
+Parsing Inputs...
+Parsing Inputs...
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+op: The nodes are operation kernel type, such as MatMul, Conv2D. Graph nodes belonging to the same type are aggregated together.
+requested bytes: The memory requested by the operation, accumulatively.
+total execution time: Sum of accelerator execution time and cpu execution time.
+cpu execution time: The time from the start to the end of the operation. It's the sum of actual cpu run time plus the time that it spends waiting if part of computation is launched asynchronously.
+accelerator execution time: Time spent executing on the accelerator. This is normally measured by the actual hardware library.
+
+Profile:
+node name | requested bytes | total execution time | accelerator execution time | cpu execution time
+Conv2D                        393.22KB (100.00%, 1.14%),     210.83ms (100.00%, 47.08%),             0us (0.00%, 0.00%),     210.83ms (100.00%, 47.08%)
+BiasAdd                               0B (0.00%, 0.00%),       95.37ms (52.92%, 21.30%),             0us (0.00%, 0.00%),       95.37ms (52.92%, 21.30%)
+Softmax                               0B (0.00%, 0.00%),       63.23ms (31.62%, 14.12%),             0us (0.00%, 0.00%),       63.23ms (31.62%, 14.12%)
+MatMul                           8.27KB (98.86%, 0.02%),       51.55ms (17.50%, 11.51%),             0us (0.00%, 0.00%),       51.55ms (17.50%, 11.51%)
+Pack                                16B (98.84%, 0.00%),         13.97ms (5.99%, 3.12%),             0us (0.00%, 0.00%),         13.97ms (5.99%, 3.12%)
+StridedSlice                         8B (98.84%, 0.00%),         10.09ms (2.87%, 2.25%),             0us (0.00%, 0.00%),         10.09ms (2.87%, 2.25%)
+MaxPool                         98.30KB (98.84%, 0.28%),          2.38ms (0.61%, 0.53%),             0us (0.00%, 0.00%),          2.38ms (0.61%, 0.53%)
+Relu                                  0B (0.00%, 0.00%),           144us (0.08%, 0.03%),             0us (0.00%, 0.00%),           144us (0.08%, 0.03%)
+Const                          34.07MB (98.55%, 98.55%),            94us (0.05%, 0.02%),             0us (0.00%, 0.00%),            94us (0.05%, 0.02%)
+Reshape                               0B (0.00%, 0.00%),            74us (0.03%, 0.02%),             0us (0.00%, 0.00%),            74us (0.03%, 0.02%)
+Shape                                32B (0.00%, 0.00%),            60us (0.01%, 0.01%),             0us (0.00%, 0.00%),            60us (0.01%, 0.01%)
+
+======================End of Report==========================
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+op: The nodes are operation kernel type, such as MatMul, Conv2D. Graph nodes belonging to the same type are aggregated together.
+requested bytes: The memory requested by the operation, accumulatively.
+total execution time: Sum of accelerator execution time and cpu execution time.
+cpu execution time: The time from the start to the end of the operation. It's the sum of actual cpu run time plus the time that it spends waiting if part of computation is launched asynchronously.
+accelerator execution time: Time spent executing on the accelerator. This is normally measured by the actual hardware library.
+
+Profile:
+node name | requested bytes | total execution time | accelerator execution time | cpu execution time
+Conv2D                        294.91KB (100.00%, 1.14%),     105.98ms (100.00%, 46.95%),             0us (0.00%, 0.00%),     105.98ms (100.00%, 46.95%)
+BiasAdd                               0B (0.00%, 0.00%),       47.71ms (53.05%, 21.14%),             0us (0.00%, 0.00%),       47.71ms (53.05%, 21.14%)
+Softmax                               0B (0.00%, 0.00%),       31.62ms (31.91%, 14.01%),             0us (0.00%, 0.00%),       31.62ms (31.91%, 14.01%)
+MatMul                           6.20KB (98.86%, 0.02%),       26.95ms (17.90%, 11.94%),             0us (0.00%, 0.00%),       26.95ms (17.90%, 11.94%)
+Pack                                12B (98.84%, 0.00%),          6.99ms (5.97%, 3.10%),             0us (0.00%, 0.00%),          6.99ms (5.97%, 3.10%)
+StridedSlice                         6B (98.84%, 0.00%),          5.05ms (2.87%, 2.24%),             0us (0.00%, 0.00%),          5.05ms (2.87%, 2.24%)
+MaxPool                         73.73KB (98.84%, 0.28%),          1.23ms (0.63%, 0.54%),             0us (0.00%, 0.00%),          1.23ms (0.63%, 0.54%)
+Relu                                  0B (0.00%, 0.00%),            78us (0.09%, 0.03%),             0us (0.00%, 0.00%),            78us (0.09%, 0.03%)
+Const                          25.56MB (98.55%, 98.55%),            59us (0.06%, 0.03%),             0us (0.00%, 0.00%),            59us (0.06%, 0.03%)
+Reshape                               0B (0.00%, 0.00%),            38us (0.03%, 0.02%),             0us (0.00%, 0.00%),            38us (0.03%, 0.02%)
+Shape                                24B (0.00%, 0.00%),            31us (0.01%, 0.01%),             0us (0.00%, 0.00%),            31us (0.01%, 0.01%)
+
+======================End of Report==========================
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  1
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 1
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              0
+-min_occurrence             0
+-step                       -1
+-order_by                   micros
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes          
+-show_name_regexes          .*
+-hide_name_regexes          
+-account_displayed_op_only  true
+-select                     bytes,micros
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+op: The nodes are operation kernel type, such as MatMul, Conv2D. Graph nodes belonging to the same type are aggregated together.
+requested bytes: The memory requested by the operation, accumulatively.
+total execution time: Sum of accelerator execution time and cpu execution time.
+cpu execution time: The time from the start to the end of the operation. It's the sum of actual cpu run time plus the time that it spends waiting if part of computation is launched asynchronously.
+accelerator execution time: Time spent executing on the accelerator. This is normally measured by the actual hardware library.
+
+Profile:
+node name | requested bytes | total execution time | accelerator execution time | cpu execution time
+MatMul                          8.27KB (100.00%, 0.02%),       3.69ms (100.00%, 55.98%),             0us (0.00%, 0.00%),       3.69ms (100.00%, 55.98%)
+Conv2D                         393.22KB (99.98%, 1.14%),        2.46ms (44.02%, 37.31%),             0us (0.00%, 0.00%),        2.46ms (44.02%, 37.31%)
+BiasAdd                               0B (0.00%, 0.00%),           146us (6.71%, 2.22%),             0us (0.00%, 0.00%),           146us (6.71%, 2.22%)
+MaxPool                         98.30KB (98.84%, 0.28%),           146us (4.49%, 2.22%),             0us (0.00%, 0.00%),           146us (4.49%, 2.22%)
+Const                          34.07MB (98.55%, 98.55%),            75us (2.28%, 1.14%),             0us (0.00%, 0.00%),            75us (2.28%, 1.14%)
+Relu                                  0B (0.00%, 0.00%),            26us (1.14%, 0.39%),             0us (0.00%, 0.00%),            26us (1.14%, 0.39%)
+StridedSlice                          8B (0.00%, 0.00%),            18us (0.74%, 0.27%),             0us (0.00%, 0.00%),            18us (0.74%, 0.27%)
+Pack                                 16B (0.00%, 0.00%),            13us (0.47%, 0.20%),             0us (0.00%, 0.00%),            13us (0.47%, 0.20%)
+Softmax                               0B (0.00%, 0.00%),            11us (0.27%, 0.17%),             0us (0.00%, 0.00%),            11us (0.27%, 0.17%)
+Shape                                32B (0.00%, 0.00%),             7us (0.11%, 0.11%),             0us (0.00%, 0.00%),             7us (0.11%, 0.11%)
+
+======================End of Report==========================

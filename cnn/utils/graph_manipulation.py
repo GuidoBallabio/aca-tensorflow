@@ -72,8 +72,7 @@ def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
             profiler = Profiler(sess.graph)
             run_meta = tf.RunMetadata()
             for input_dict in input_LD:
-                step_counter += 1
-                if step_counter % 10 == 0:
+                if step_counter % 5 == 0:
                     pctx.trace_next_step()
                     pctx.dump_next_step()
                     sess.run(
@@ -100,7 +99,7 @@ def run_graph_and_analyze(graph, input_LD, output_names, timeline=False):
                         profiler.profile_graph(options=opts)
                 else:
                     sess.run(output_names, feed_dict=input_dict)
-
+                step_counter += 1
 
 def just_run_graph(graph, input_LD, output_names):
     with tf.Session(graph=graph) as sess:
