@@ -1,5 +1,5 @@
 *****
-aca-tensorflow
+QuantiCNN
 *****
 .. image:: https://travis-ci.com/GuidoBallabio/aca-tensorflow.svg?token=ytqCy67zq34yubQv5jpR&branch=master
     :target: https://travis-ci.com/GuidoBallabio/aca-tensorflow
