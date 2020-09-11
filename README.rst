@@ -1,12 +1,12 @@
 *****
-QuantiCNN
+QuantiCNN :rocket:
 *****
 
 Advanced Computer Architectures course project on implementation, evaluation and comparison of CNNs:
 
-Train a CNN model for Cifar-10 or MNIST dataset with Tensorflow then use Quantization methods present in Tensorflow framework to generate models with possibly different quantization/compression methdos. Compare all the models on the basis of model accuracy in inference forwardpass, execution time performance, size of the models.
+Train a CNN model for Cifar-10 or MNIST dataset with Tensorflow then use Quantization methods present in Tensorflow framework to generate models with possibly different quantization/compression methods. Compare all the models on the basis of model accuracy in inference forwardpass, execution time performance, size of the models.
 
-Details:
+Details: :books:
 ########
 
 Benchmark run on CPU:
@@ -28,7 +28,7 @@ L3 4    MiB 2x2     MiB	 	                      write-back
 (requirments.txt lacks perf and tensorflow-profiler for cache analysis as well as jupyter notebooks packages)
 
 
-Important Notes:
+Important Notes: :triangular_ruler:
 ****************
 
 Try to make timing measurements as accurate as possible, meaning:
